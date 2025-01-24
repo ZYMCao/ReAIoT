@@ -1,0 +1,31 @@
+server:
+  port: 7845
+spring:
+  application:
+    name: ReAIoT
+  ai:
+    openai:
+      api-key: ${env.DEEPSEEK_API_KEY}
+      base-url: https://api.deepseek.com # 深度求索
+  r2dbc:
+    url: "${R2DBC_URL:r2dbc:postgresql://113.31.103.66:5432/webflux}"
+    username: "${R2DBC_USERNAME:postgres}"
+    password: "${R2DBC_PASSWORD:3.1415926Pi}"
+  sql:
+    init:
+      mode: always
+#  h2:
+#    console:
+#      enabled: false
+#  data:
+#    cassandra:
+#      keyspace-name: "${CASSANDRA_KEYSPACE_NAME:thingsboard}"
+#      contact-points: "${CASSANDRA_URL:113.31.103.66:9042}"
+#      port: "${CASSANDRA_PORT:9042}"
+#      username: "${CASSANDRA_USERNAME:cassandra}"
+#      password: "${CASSANDRA_PASSWORD:cassandra}"
+#      schema-action: create_if_not_exists  # Options: create, create_if_not_exists, none, validate, drop
+#      local-datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"
+logging:
+  level:
+    root: INFO
