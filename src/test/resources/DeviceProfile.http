@@ -1,0 +1,2 @@
+### device-profiles/default
+GET http://localhost:7845/api/device-profiles/default/991311e0-8d3d-11ef-bf95-5bd8c4f1ab1c

@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.domain.persistence.sql;
+package cn.easttrans.reaiot.domain;
 
 import lombok.Getter;
 

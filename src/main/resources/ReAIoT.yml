@@ -4,19 +4,19 @@ spring:
   application:
     name: ReAIoT
   ai:
-    openai:
-      api-key: ${env.DEEPSEEK_API_KEY}
-      base-url: https://api.deepseek.com # 深度求索
-  r2dbc:
-    url: "${R2DBC_URL:r2dbc:postgresql://113.31.103.66:5432/webflux}"
-    username: "${R2DBC_USERNAME:postgres}"
-    password: "${R2DBC_PASSWORD:3.1415926Pi}"
-  sql:
-    init:
-      mode: always
-#  h2:
-#    console:
-#      enabled: false
+    openai: # https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html
+      api-key: "${DEEPSEEK_API_KEY}"
+      base-url: "${DEEPSEEK_BASE_URL:https://api.deepseek.com}" # 深度求索
+      chat:
+        options:
+          model: "${DEEPSEEK_MODEL:deepseek-chat}" # deepseek-chat 或 deepseek-reasoner
+#  r2dbc:
+#    url: "${R2DBC_URL:r2dbc:postgresql://113.31.103.66:5432/thingsboard}"
+#    username: "${R2DBC_USERNAME:postgres}"
+#    password: "${R2DBC_PASSWORD:3.1415926Pi}"
+#  sql:
+#    init:
+#      mode: always
 #  data:
 #    cassandra:
 #      keyspace-name: "${CASSANDRA_KEYSPACE_NAME:thingsboard}"

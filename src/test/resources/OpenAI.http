@@ -1,0 +1,9 @@
+### Test
+GET http://localhost:7845/api/open-ai/userTextChat?userText=Hello%20I%20am%20Zhanying
+
+### Test 2
+GET http://localhost:7845/api/open-ai/userTextChat?userText=Hello
+
+
+
+

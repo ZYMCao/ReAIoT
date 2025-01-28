@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.domain.persistence;
+package cn.easttrans.reaiot.domain;
 
 public final class ModelConstants {
     /**
@@ -19,12 +19,21 @@ public final class ModelConstants {
     public static final String ADDITIONAL_INFO = "additional_info";
     public static final String ENTITY_TYPE = "entity_type";
     public static final String ENTITY_ID = "entity_id";
+    public static final String ENTITY_NAME = "entity_name";
     public static final String ATTRIBUTE_TYPE = "attribute_type";
     public static final String ATTRIBUTE_KEY = "attribute_key";
     public static final String LAST_UPDATE_TS = "last_update_ts";
     public static final String OWNER_NAME = "owner_name";
     public static final String OWNER_IDS = "owner_ids";
     public static final String GROUPS = "groups";
+    public static final String LABEL = "label";
+    public static final String DESCRIPTION = "description";
+    public static final String IMAGE = "image";
+    public static final String IS_DEFAULT = "is_default";
+    public static final String ROUTING_KEY = "routing_key";
+    public static final String SECRET = "secret";
+    public static final String DEBUG_MODE = "debug_mode";
+    public static final String PROFILE_DATA = "profile_data";
 
     /**
      * Default constants.
@@ -36,13 +45,20 @@ public final class ModelConstants {
     public static final String DEFAULT_RULE_CHAIN_ID = "default_rule_chain_id";
 
     /**
-     * User constants.
+     * User & Contact constants.
      */
-    public static final String USER_PG_HIBERNATE_TABLE_NAME = "tb_user";
-    public static final String USER_EMAIL = "email";
-    public static final String USER_AUTHORITY = "authority";
-    public static final String USER_FIRST_NAME = "first_name";
-    public static final String USER_LAST_NAME = "last_name";
+    public static final String USER_TABLE_NAME = "tb_user";
+    public static final String AUTHORITY = "authority";
+    public static final String FIRST_NAME = "first_name";
+    public static final String LAST_NAME = "last_name";
+    public static final String COUNTRY = "country";
+    public static final String STATE = "state";
+    public static final String CITY = "city";
+    public static final String ADDRESS = "address";
+    public static final String ADDRESS2 = "address2";
+    public static final String ZIP = "zip";
+    public static final String PHONE = "phone";
+    public static final String EMAIL = "email";
     /**
      * User_credentials constants.
      */
@@ -73,41 +89,23 @@ public final class ModelConstants {
     public static final String ADMIN_SETTINGS_JSON_VALUE = "json_value";
 
     /**
-     * Contact constants.
-     */
-    public static final String COUNTRY = "country";
-    public static final String STATE = "state";
-    public static final String CITY = "city";
-    public static final String ADDRESS = "address";
-    public static final String ADDRESS2 = "address2";
-    public static final String ZIP = "zip";
-    public static final String PHONE = "phone";
-    public static final String EMAIL = "email";
-
-    /**
      * Tenant constants.
      */
     public static final String TENANT_TABLE_NAME = "tenant";
-    public static final String TENANT_TITLE = TITLE;
-    public static final String TENANT_REGION = "region";
-    public static final String TENANT_TENANT_PROFILE_ID = "tenant_profile_id";
+    public static final String REGION = "region";
+    public static final String TENANT_PROFILE_ID = "tenant_profile_id";
 
     /**
      * Tenant profile constants.
      */
     public static final String TENANT_PROFILE_TABLE_NAME = "tenant_profile";
-    public static final String TENANT_PROFILE_NAME = "name";
-    public static final String TENANT_PROFILE_PROFILE_DATA = "profile_data";
-    public static final String TENANT_PROFILE_DESCRIPTION = "description";
-    public static final String TENANT_PROFILE_IS_DEFAULT = "is_default";
-    public static final String TENANT_PROFILE_ISOLATED_TB_RULE_ENGINE = "isolated_tb_rule_engine";
+    public static final String ISOLATED_TB_RULE_ENGINE = "isolated_tb_rule_engine";
 
     /**
      * Customer constants.
      */
     public static final String CUSTOMER_TABLE_NAME = "customer";
-    public static final String CUSTOMER_PARENT_CUSTOMER_ID = "parent_customer_id";
-    public static final String CUSTOMER_TITLE = TITLE;
+    public static final String PARENT_CUSTOMER_ID = "parent_customer_id";
     public static final String CUSTOMER_INFO_VIEW_TABLE_NAME = "customer_info_view";
     public static final String OWNER_INFO_VIEW_TABLE_NAME = "owner_info_view";
     public static final String OWNER_INFO_VIEW_IS_PUBLIC = "is_public";
@@ -116,17 +114,10 @@ public final class ModelConstants {
      * Device constants.
      */
     public static final String DEVICE_TABLE_NAME = "device";
-    public static final String DEVICE_NAME = "name";
-    public static final String DEVICE_TYPE = "type";
-    public static final String DEVICE_LABEL = "label";
     public static final String DEVICE_DEVICE_PROFILE_ID = "device_profile_id";
     public static final String DEVICE_DEVICE_DATA = "device_data";
-    public static final String DEVICE_FIRMWARE_ID = "firmware_id";
-    public static final String DEVICE_SOFTWARE_ID = "software_id";
-
-    public static final String DEVICE_CUSTOMER_TITLE = "customer_title";
-    public static final String DEVICE_CUSTOMER_IS_PUBLIC = "customer_is_public";
-    public static final String DEVICE_DEVICE_PROFILE_NAME = "device_profile_name";
+    public static final String FIRMWARE_ID = "firmware_id";
+    public static final String SOFTWARE_ID = "software_id";
     public static final String DEVICE_ACTIVE = "active";
 
     public static final String DEVICE_INFO_VIEW_TABLE_NAME = "device_info_view";
@@ -135,20 +126,14 @@ public final class ModelConstants {
      * Device profile constants.
      */
     public static final String DEVICE_PROFILE_TABLE_NAME = "device_profile";
-    public static final String DEVICE_PROFILE_TRANSPORT_TYPE = "transport_type";
-    public static final String DEVICE_PROFILE_PROVISION_TYPE = "provision_type";
-    public static final String DEVICE_PROFILE_PROFILE_DATA = "profile_data";
-    public static final String DEVICE_PROFILE_IS_DEFAULT = "is_default";
+    public static final String TRANSPORT_TYPE = "transport_type";
+    public static final String PROVISION_TYPE = "provision_type";
     public static final String PROVISION_DEVICE_KEY = "provision_device_key";
 
     /**
      * Asset profile constants.
      */
     public static final String ASSET_PROFILE_TABLE_NAME = "asset_profile";
-    public static final String ASSET_PROFILE_NAME = "name";
-    public static final String ASSET_PROFILE_IMAGE = "image";
-    public static final String ASSET_PROFILE_DESCRIPTION = "description";
-    public static final String ASSET_PROFILE_IS_DEFAULT = "is_default";
 
     /**
      * Entity view constants.
@@ -163,45 +148,29 @@ public final class ModelConstants {
      * Audit log constants.
      */
     public static final String AUDIT_LOG_TABLE_NAME = "audit_log";
-    public static final String AUDIT_LOG_ENTITY_NAME = "entity_name";
-    public static final String AUDIT_LOG_USER_NAME = "user_name";
-    public static final String AUDIT_LOG_ACTION_TYPE = "action_type";
-    public static final String AUDIT_LOG_ACTION_DATA = "action_data";
-    public static final String AUDIT_LOG_ACTION_STATUS = "action_status";
-    public static final String AUDIT_LOG_ACTION_FAILURE_DETAILS = "action_failure_details";
+    public static final String USER_NAME = "user_name";
+    public static final String ACTION_TYPE = "action_type";
+    public static final String ACTION_DATA = "action_data";
+    public static final String ACTION_STATUS = "action_status";
+    public static final String ACTION_FAILURE_DETAILS = "action_failure_details";
 
     /**
      * Asset constants.
      */
     public static final String ASSET_TABLE_NAME = "asset";
-    public static final String ASSET_NAME = "name";
-    public static final String ASSET_TYPE = "type";
-    public static final String ASSET_LABEL = "label";
 
-    public static final String ASSET_ASSET_PROFILE_ID = "asset_profile_id";
+    public static final String ASSET_PROFILE_ID = "asset_profile_id";
     public static final String ASSET_INFO_VIEW_TABLE_NAME = "asset_info_view";
     public static final String CONVERTER_TABLE_NAME = "converter";
-    public static final String CONVERTER_NAME = "name";
-    public static final String CONVERTER_TYPE = "type";
-    public static final String CONVERTER_DEBUG_MODE = "debug_mode";
-    public static final String CONVERTER_CONFIGURATION = "configuration";
     public static final String CONVERTER_IS_EDGE_TEMPLATE_MODE = "is_edge_template";
     public static final String INTEGRATION_TABLE_NAME = "integration";
-    public static final String INTEGRATION_NAME = "name";
-    public static final String INTEGRATION_SECRET = "secret";
-    public static final String INTEGRATION_CONVERTER_ID = "converter_id";
-    public static final String INTEGRATION_DOWNLINK_CONVERTER_ID = "downlink_converter_id";
-    public static final String INTEGRATION_ROUTING_KEY = "routing_key";
-    public static final String INTEGRATION_TYPE = "type";
-    public static final String INTEGRATION_DEBUG_MODE = "debug_mode";
-    public static final String INTEGRATION_ENABLED = "enabled";
-    public static final String INTEGRATION_IS_REMOTE = "is_remote";
-    public static final String INTEGRATION_ALLOW_CREATE_DEVICES_OR_ASSETS = "allow_create_devices_or_assets";
-    public static final String INTEGRATION_CONFIGURATION = "configuration";
-    public static final String INTEGRATION_IS_EDGE_TEMPLATE_MODE = "is_edge_template";
+    public static final String CONVERTER_ID = "converter_id";
+    public static final String DOWNLINK_CONVERTER_ID = "downlink_converter_id";
+    public static final String ENABLED = "enabled";
+    public static final String IS_REMOTE = "is_remote";
+    public static final String ALLOW_CREATE_DEVICES_OR_ASSETS = "allow_create_devices_or_assets";
+    public static final String IS_EDGE_TEMPLATE = "is_edge_template";
     public static final String INTEGRATION_VIEW_NAME = "integration_info";
-    public static final String INTEGRATION_VIEW_STATS = "stats";
-    public static final String INTEGRATION_VIEW_STATUS = "status";
 
     /**
      * Alarm constants.
@@ -209,43 +178,42 @@ public final class ModelConstants {
     public static final String ENTITY_ALARM_TABLE_NAME = "entity_alarm";
     public static final String ALARM_TABLE_NAME = "alarm";
     public static final String ALARM_VIEW_NAME = "alarm_info";
-    public static final String ALARM_TYPE = "type";
-    public static final String ALARM_STATUS = "status";
-    public static final String ALARM_ORIGINATOR_ID = "originator_id";
-    public static final String ALARM_ORIGINATOR_NAME = "originator_name";
-    public static final String ALARM_ORIGINATOR_LABEL = "originator_label";
-    public static final String ALARM_ORIGINATOR_TYPE = "originator_type";
-    public static final String ALARM_SEVERITY = "severity";
-    public static final String ALARM_ASSIGNEE_ID = "assignee_id";
-    public static final String ALARM_ASSIGNEE_FIRST_NAME = "assignee_first_name";
-    public static final String ALARM_ASSIGNEE_LAST_NAME = "assignee_last_name";
-    public static final String ALARM_ASSIGNEE_EMAIL = "assignee_email";
-    public static final String ALARM_START_TS = "start_ts";
-    public static final String ALARM_END_TS = "end_ts";
-    public static final String ALARM_ACKNOWLEDGED = "acknowledged";
-    public static final String ALARM_ACK_TS = "ack_ts";
-    public static final String ALARM_CLEARED = "cleared";
-    public static final String ALARM_CLEAR_TS = "clear_ts";
-    public static final String ALARM_ASSIGN_TS = "assign_ts";
-    public static final String ALARM_PROPAGATE = "propagate";
-    public static final String ALARM_PROPAGATE_TO_OWNER = "propagate_to_owner";
-    public static final String ALARM_PROPAGATE_TO_OWNER_HIERARCHY = "propagate_to_owner_hierarchy";
-    public static final String ALARM_PROPAGATE_TO_TENANT = "propagate_to_tenant";
-    public static final String ALARM_PROPAGATE_RELATION_TYPES = "propagate_relation_types";
+    public static final String TYPE = "type";
+    public static final String STATUS = "status";
+    public static final String ORIGINATOR_ID = "originator_id";
+    public static final String ORIGINATOR_NAME = "originator_name";
+    public static final String ORIGINATOR_LABEL = "originator_label";
+    public static final String ORIGINATOR_TYPE = "originator_type";
+    public static final String SEVERITY = "severity";
+    public static final String ASSIGNEE_FIRST_NAME = "assignee_first_name";
+    public static final String ASSIGNEE_LAST_NAME = "assignee_last_name";
+    public static final String ASSIGNEE_EMAIL = "assignee_email";
+    public static final String START_TS = "start_ts";
+    public static final String END_TS = "end_ts";
+    public static final String ACKNOWLEDGED = "acknowledged";
+    public static final String ACK_TS = "ack_ts";
+    public static final String CLEARED = "cleared";
+    public static final String CLEAR_TS = "clear_ts";
+    public static final String ASSIGN_TS = "assign_ts";
+    public static final String PROPAGATE = "propagate";
+    public static final String PROPAGATE_TO_OWNER = "propagate_to_owner";
+    public static final String PROPAGATE_TO_OWNER_HIERARCHY = "propagate_to_owner_hierarchy";
+    public static final String PROPAGATE_TO_TENANT = "propagate_to_tenant";
+    public static final String PROPAGATE_RELATION_TYPES = "propagate_relation_types";
 
-    public static final String ALARM_COMMENT_TABLE_NAME = "alarm_comment";
-    public static final String ALARM_COMMENT_ALARM_ID = "alarm_id";
-    public static final String ALARM_COMMENT_TYPE = "type";
-    public static final String ALARM_COMMENT_COMMENT = "comment";
+    public static final String COMMENT_TABLE_NAME = "alarm_comment";
+    public static final String COMMENT_ALARM_ID = "alarm_id";
+    public static final String COMMENT_TYPE = "type";
+    public static final String COMMENT_COMMENT = "comment";
 
     /**
      * Entity relation constants.
      */
     public static final String RELATION_TABLE_NAME = "relation";
-    public static final String RELATION_FROM_ID = "from_id";
-    public static final String RELATION_FROM_TYPE = "from_type";
-    public static final String RELATION_TO_ID = "to_id";
-    public static final String RELATION_TO_TYPE = "to_type";
+    public static final String FROM_ID = "from_id";
+    public static final String FROM_TYPE = "from_type";
+    public static final String TO_ID = "to_id";
+    public static final String TO_TYPE = "to_type";
     public static final String RELATION_TYPE = "relation_type";
     public static final String RELATION_TYPE_GROUP = "relation_type_group";
     public static final String ENTITY_GROUP_TABLE_NAME = "entity_group";
@@ -268,8 +236,6 @@ public final class ModelConstants {
      * Widgets_bundle constants.
      */
     public static final String WIDGETS_BUNDLE_TABLE_NAME = "widgets_bundle";
-    public static final String WIDGETS_BUNDLE_IMAGE = "image";
-    public static final String WIDGETS_BUNDLE_DESCRIPTION = "description";
     public static final String WIDGETS_BUNDLE_ORDER = "widgets_bundle_order";
 
     /**
@@ -277,17 +243,11 @@ public final class ModelConstants {
      */
     public static final String WIDGET_TYPE_TABLE_NAME = "widget_type";
 
-    public static final String WIDGET_TYPE_FQN = "fqn";
-    public static final String WIDGET_TYPE_NAME = "name";
-    public static final String WIDGET_TYPE_IMAGE = "image";
-    public static final String WIDGET_TYPE_DESCRIPTION = "description";
-    public static final String WIDGET_TYPE_TAGS = "tags";
-    public static final String WIDGET_TYPE_DESCRIPTOR = "descriptor";
-
-    public static final String WIDGET_TYPE_DEPRECATED = "deprecated";
-
-    public static final String WIDGET_TYPE_WIDGET_TYPE = "widget_type";
-
+    public static final String FQN = "fqn";
+    public static final String TAGS = "tags";
+    public static final String DESCRIPTOR = "descriptor";
+    public static final String DEPRECATED = "deprecated";
+    public static final String WIDGET_TYPE = "widget_type";
     public static final String WIDGET_TYPE_INFO_VIEW_TABLE_NAME = "widget_type_info_view";
 
     /**
@@ -301,11 +261,10 @@ public final class ModelConstants {
      * Dashboard constants.
      */
     public static final String DASHBOARD_TABLE_NAME = "dashboard";
-    public static final String DASHBOARD_IMAGE = "image";
     public static final String DASHBOARD_CONFIGURATION = "configuration";
-    public static final String DASHBOARD_ASSIGNED_CUSTOMERS = "assigned_customers";
-    public static final String DASHBOARD_MOBILE_HIDE = "mobile_hide";
-    public static final String DASHBOARD_MOBILE_ORDER = "mobile_order";
+    public static final String ASSIGNED_CUSTOMERS = "assigned_customers";
+    public static final String MOBILE_HIDE = "mobile_hide";
+    public static final String MOBILE_ORDER = "mobile_order";
     public static final String DASHBOARD_INFO_VIEW_TABLE_NAME = "dashboard_info_view";
 
     /**
@@ -334,17 +293,17 @@ public final class ModelConstants {
     public static final String CONVERTER_DEBUG_EVENT_TABLE_NAME = "converter_debug_event";
     public static final String INTEGRATION_DEBUG_EVENT_TABLE_NAME = "integration_debug_event";
 
-    public static final String EVENT_SERVICE_ID = "service_id";
+    public static final String SERVICE_ID = "service_id";
     public static final String EVENT_ENTITY_ID = "entity_id";
 
-    public static final String EVENT_MESSAGES_PROCESSED_NAME = "e_messages_processed";
-    public static final String EVENT_ERRORS_OCCURRED_NAME = "e_errors_occurred";
+    public static final String E_MESSAGES_PROCESSED = "e_messages_processed";
+    public static final String E_ERRORS_OCCURRED = "e_errors_occurred";
 
     public static final String EVENT_METHOD_NAME = "e_method";
 
-    public static final String EVENT_TYPE_NAME = "e_type";
-    public static final String EVENT_ERROR_NAME = "e_error";
-    public static final String EVENT_SUCCESS_NAME = "e_success";
+    public static final String E_TYPE = "e_type";
+    public static final String E_ERROR = "e_error";
+    public static final String E_SUCCESS = "e_success";
 
     public static final String EVENT_ENTITY_ID_NAME = "e_entity_id";
     public static final String EVENT_ENTITY_TYPE_NAME = "e_entity_type";
@@ -363,7 +322,6 @@ public final class ModelConstants {
     public static final String EVENT_OUT_MSG_TYPE_NAME = "e_out_message_type";
     public static final String EVENT_OUT_MSG_NAME = "e_out_message";
 
-    public static final String DEBUG_MODE = "debug_mode";
     public static final String SINGLETON_MODE = "singleton_mode";
     public static final String EVENT_QUEUE_NAME = "queue_name";
 
@@ -524,20 +482,13 @@ public final class ModelConstants {
     public static final String RPC_REQUEST = "request";
     public static final String RPC_RESPONSE = "response";
     public static final String RPC_STATUS = "status";
-
     /**
      * Edge constants.
      */
     public static final String EDGE_TABLE_NAME = "edge";
-    public static final String EDGE_ROOT_RULE_CHAIN_ID = "root_rule_chain_id";
-    public static final String EDGE_NAME = "name";
-    public static final String EDGE_LABEL = "label";
-    public static final String EDGE_TYPE = "type";
-
-    public static final String EDGE_ROUTING_KEY = "routing_key";
-    public static final String EDGE_SECRET = "secret";
+    public static final String ROOT_RULE_CHAIN_ID = "root_rule_chain_id";
     public static final String EDGE_LICENSE_KEY = "edge_license_key";
-    public static final String EDGE_CLOUD_ENDPOINT_KEY = "cloud_endpoint";
+    public static final String CLOUD_ENDPOINT = "cloud_endpoint";
     public static final String EDGE_INFO_VIEW_TABLE_NAME = "edge_info_view";
 
     /**
@@ -601,14 +552,12 @@ public final class ModelConstants {
     public static final String NOTIFICATION_TARGET_CONFIGURATION = "configuration";
 
     public static final String NOTIFICATION_TABLE_NAME = "notification";
-    public static final String NOTIFICATION_REQUEST_ID = "request_id";
-    public static final String NOTIFICATION_RECIPIENT_ID = "recipient_id";
-    public static final String NOTIFICATION_TYPE = "type";
-    public static final String NOTIFICATION_DELIVERY_METHOD = "delivery_method";
-    public static final String NOTIFICATION_SUBJECT = "subject";
-    public static final String NOTIFICATION_TEXT = "body";
-    public static final String NOTIFICATION_ADDITIONAL_CONFIG = "additional_config";
-    public static final String NOTIFICATION_STATUS = "status";
+    public static final String REQUEST_ID = "request_id";
+    public static final String RECIPIENT_ID = "recipient_id";
+    public static final String DELIVERY_METHOD = "delivery_method";
+    public static final String SUBJECT = "subject";
+    public static final String BODY = "body";
+    public static final String ADDITIONAL_CONFIG = "additional_config";
 
     public static final String NOTIFICATION_REQUEST_TABLE_NAME = "notification_request";
     public static final String NOTIFICATION_REQUEST_TARGETS = "targets";

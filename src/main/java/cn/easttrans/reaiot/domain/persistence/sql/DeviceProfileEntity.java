@@ -6,23 +6,23 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.UUID;
 
-import static cn.easttrans.reaiot.domain.persistence.ModelConstants.*;
+import static cn.easttrans.reaiot.domain.ModelConstants.*;
 
 @Table(DEVICE_PROFILE_TABLE_NAME)
-public record DeviceProfile(
+public record DeviceProfileEntity(
         @Id UUID id,
         @Column(CREATED_TIME) long createdTime,
-        String name,
-        String type,
-        String image,
-        @Column(DEVICE_PROFILE_TRANSPORT_TYPE) String transportType,
-        @Column(DEVICE_PROFILE_PROVISION_TYPE) String provisionType,
-        @Column(DEVICE_PROFILE_PROFILE_DATA) String profileData,
-        String description,
-        @Column(DEVICE_PROFILE_IS_DEFAULT) boolean isDefault,
+        @Column(NAME) String name,
+        @Column(TYPE) String type,
+        @Column(IMAGE) String image,
+        @Column(TRANSPORT_TYPE) String transportType,
+        @Column(PROVISION_TYPE) String provisionType,
+        @Column(PROFILE_DATA) String profileData,
+        @Column(DESCRIPTION) String description,
+        @Column(IS_DEFAULT) boolean isDefault,
         @Column(TENANT_ID) UUID tenantId,
-        @Column(DEVICE_FIRMWARE_ID) UUID firmwareId,
-        @Column(DEVICE_SOFTWARE_ID) UUID softwareId,
+        @Column(FIRMWARE_ID) UUID firmwareId,
+        @Column(SOFTWARE_ID) UUID softwareId,
         @Column(DEFAULT_RULE_CHAIN_ID) UUID defaultRuleChainId,
         @Column(DEFAULT_DASHBOARD_ID) UUID defaultDashboardId,
         @Column(DEFAULT_QUEUE_NAME) String defaultQueueName,

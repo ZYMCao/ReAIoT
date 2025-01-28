@@ -1,7 +1,7 @@
 package cn.easttrans.reaiot.service;
 
 import cn.easttrans.reaiot.dao.sql.DeviceProfileRepository;
-import cn.easttrans.reaiot.domain.persistence.sql.DeviceProfile;
+import cn.easttrans.reaiot.domain.persistence.sql.DeviceProfileEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -19,15 +19,19 @@ import java.util.UUID;
 public class DeviceProfileService {
     private final DeviceProfileRepository deviceProfileRepository;
 
-    public Mono<DeviceProfile> createDeviceProfile(DeviceProfile deviceProfile) {
+    public Mono<DeviceProfileEntity> createDeviceProfile(DeviceProfileEntity deviceProfile) {
         return deviceProfileRepository.save(deviceProfile);
     }
 
-    public Flux<DeviceProfile> getDeviceProfilesByTenantId(UUID tenantId) {
+    public Flux<DeviceProfileEntity> getDeviceProfilesByTenantId(UUID tenantId) {
         return deviceProfileRepository.findByTenantId(tenantId);
     }
 
-    public Mono<DeviceProfile> getDeviceProfileByNameAndTenantId(String name, UUID tenantId) {
+    public Mono<DeviceProfileEntity> getDeviceProfileByNameAndTenantId(String name, UUID tenantId) {
         return deviceProfileRepository.findByNameAndTenantId(name, tenantId);
+    }
+
+    public Flux<DeviceProfileEntity> findDefaultDeviceProfilesByTenantId(UUID tenantId) {
+        return deviceProfileRepository.findDefaultDeviceProfilesByTenantId(tenantId);
     }
 }
