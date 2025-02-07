@@ -28,4 +28,12 @@ spring:
 #      local-datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"
 logging:
   level:
-    root: INFO
+    cn:
+      easttrans:
+        reaiot: TRACE
+    io:
+      netty:
+        handler: TRACE
+    reactor:
+      netty:
+        channel: TRACE

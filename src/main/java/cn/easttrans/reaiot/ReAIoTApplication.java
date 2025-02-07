@@ -1,11 +1,21 @@
 package cn.easttrans.reaiot;
 
+import cn.easttrans.reaiot.mqtt.DefaultMqttClient;
+import cn.easttrans.reaiot.mqtt.MqttClient;
+import cn.easttrans.reaiot.mqtt.MqttClientConfig;
+import cn.easttrans.reaiot.mqtt.ReMqttClient;
+import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.reactor.MqttReactorClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import reactor.core.publisher.Flux;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 @Slf4j
@@ -25,5 +35,37 @@ public class ReAIoTApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
+        testHive();
+    }
+
+    private static void testHive() {
+        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
+        DefaultMqttClient defaultMqttClient = new DefaultMqttClient(localConfig);
+        var connection = defaultMqttClient.connect();
+    }
+
+    private static void testClient() {
+        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
+        DefaultMqttClient defaultMqttClient = new DefaultMqttClient(localConfig);
+        var connection = defaultMqttClient.connect();
+
+        connection.inbound()
+                .receive()
+                .doOnNext(byteBuf ->
+                        log.info(byteBuf.toString())
+                )
+//                .doOnNext(byteBuf -> log.info("Received message: {}", byteBuf.toString(StandardCharsets.UTF_8)))
+                .then()
+                .subscribe();
+
+//        connection.onDispose()
+//                .block();
+    }
+
+    private static void testReactiveClient() {
+        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
+        ReMqttClient reactorMqttClient = new ReMqttClient(localConfig);
+        reactorMqttClient.connect().subscribe();
+//        reactorMqttClient.connect("iot.djzhgd.com", 10006).subscribe();
     }
 }
