@@ -4,8 +4,6 @@ import cn.easttrans.reaiot.mqtt.DefaultMqttClient;
 import cn.easttrans.reaiot.mqtt.MqttClient;
 import cn.easttrans.reaiot.mqtt.MqttClientConfig;
 import cn.easttrans.reaiot.mqtt.ReMqttClient;
-import com.hivemq.client.mqtt.MqttClient;
-import com.hivemq.client.mqtt.reactor.MqttReactorClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,7 +33,7 @@ public class ReAIoTApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
-        testHive();
+        testReactiveClient();
     }
 
     private static void testHive() {
@@ -63,9 +61,16 @@ public class ReAIoTApplication {
     }
 
     private static void testReactiveClient() {
-        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
-        ReMqttClient reactorMqttClient = new ReMqttClient(localConfig);
-        reactorMqttClient.connect().subscribe();
-//        reactorMqttClient.connect("iot.djzhgd.com", 10006).subscribe();
+//        MqttClientConfig config = new MqttClientConfig("admin", "public");
+//        ReMqttClient reMqttClient = new ReMqttClient(config);
+//        reMqttClient.connect("iot.djzhgd.com", 10006);
+
+        MqttClientConfig config = new MqttClientConfig("P06dg3G1QdiTuemDjH3Q", null);
+        ReMqttClient reMqttClient = new ReMqttClient(config);
+        reMqttClient.connect("113.31.103.66", 1883);
+
+//        MqttClientConfig config = new MqttClientConfig("ReAIoT", "2.7182818e");
+//        ReMqttClient reMqttClient = new ReMqttClient(config);
+//        reMqttClient.connect("localhost", 1883);
     }
 }

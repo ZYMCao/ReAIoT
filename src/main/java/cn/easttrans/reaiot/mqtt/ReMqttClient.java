@@ -84,56 +84,41 @@ public class ReMqttClient implements MqttClient {
     }
 
     @Override
-    public Mono<? extends Connection> connect() {
+    public Connection connect() {
         return this.connect("localhost", 1883);
     }
 
     @Override
-    public Mono<? extends Connection> connect(String host, int port) {
-        log.info("Mqtt Broker deployed at {}:{} 尝试连接中 ...", host, port);
+    public Connection connect(String host, int port) {
+        log.info("Trying to connect to the Mqtt Broker deployed at {}:{} ...", host, port);
 
         return TcpClient.create()
                 .host(host)
                 .port(port)
                 .doOnChannelInit((connectionObserver, channel, remoteAddress) -> {
-                            channel.pipeline().addLast("mqttDecoder", new MqttDecoder(65536));
-                            channel.pipeline().addLast("mqttEncoder", INSTANCE);
-                            channel.pipeline().addLast("mqttLog", new LoggingHandler(DEBUG));
-//                            channel.pipeline().addLast("mqttHandler", new MqttChannelInboundHandler(connAckSink));
-                        }
-                )
+                    channel.pipeline().addLast("mqttDecoder", new MqttDecoder(65536));
+                    channel.pipeline().addLast("mqttEncoder", INSTANCE);
+                    channel.pipeline().addLast("mqttHandler", new MqttChannelInboundHandler());
+                })
                 .doOnConnected(conexus ->
                         conexus.outbound()
                                 .sendObject(clientConfig.toMqttConnectMessage())
                                 .then()
                                 .subscribe())
                 .connect()
-//                .doOnNext(conexus -> {
-//                    log.info("tcpClient.connect().doOnNext: TCP连接已成功建立!!");
-//                    this.connection = conexus;
-//                    conexus.onDispose()
-//                            .doOnTerminate(
-//                                    () -> connected.set(false)
-//                            )
-//                            .then(Mono.<Void>never()) // 维持连接
-//                            .subscribe();
-//                })
+                .block();
+//                .doOnNext(conexus ->
+//                        conexus.inbound()
+//                                .receive()
+//                                .doOnNext(x -> log.info(String.valueOf(x)))
+//                                .subscribe()
+//                )
 //                .flatMap(conexus ->
-//                        connAckSink.asMono())
-//                .doOnSuccess(conexus ->
-//                        connected.set(true))
-//                .doOnError(error -> {
-//                    log.error("Connection failed", error);
-//                    if (connection != null) {
-//                        connection.dispose();
-//                    }
-//                })
-//                .doFinally(signal -> {
-//                    if (signal == CANCEL && connection != null) {
-//                        connection.dispose();
-//                    }
-//                })
-                ;
+//                        conexus.inbound()
+//                                .receive()
+//                                .doOnNext(x -> log.info(String.valueOf(x)))
+//                                .then()
+//                )
     }
 
 //    @Override
@@ -166,16 +151,7 @@ public class ReMqttClient implements MqttClient {
 //        // ...
 //    }
 
-    @RequiredArgsConstructor
     private static final class MqttChannelInboundHandler extends SimpleChannelInboundHandler<MqttMessage> {
-        private final Sinks.One<Void> connAckSink;
-
-        @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-            log.error(String.valueOf(connAckSink.tryEmitError(cause)));
-            ctx.close();
-        }
-
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) {
             log.info("Processing msg: {}", msg);
@@ -216,10 +192,10 @@ public class ReMqttClient implements MqttClient {
 
         private void handleConnAck(ChannelHandlerContext ctx, MqttConnAckMessage connAckMsg) {
             switch (connAckMsg.variableHeader().connectReturnCode()) {
-                case CONNECTION_ACCEPTED -> log.info(String.valueOf(connAckSink.tryEmitEmpty()));
+                case CONNECTION_ACCEPTED -> log.info(String.valueOf(connAckMsg));
                 case CONNECTION_REFUSED_BAD_USER_NAME_OR_PASSWORD, CONNECTION_REFUSED_IDENTIFIER_REJECTED, CONNECTION_REFUSED_NOT_AUTHORIZED, CONNECTION_REFUSED_SERVER_UNAVAILABLE, CONNECTION_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION ->
                         log.error(String.valueOf(
-                                connAckSink.tryEmitError(new Exception("Mqtt连接失败: " + connAckMsg.variableHeader().connectReturnCode()))
+                                new Exception("Mqtt连接失败: " + connAckMsg.variableHeader().connectReturnCode())
                         ));
             }
         }

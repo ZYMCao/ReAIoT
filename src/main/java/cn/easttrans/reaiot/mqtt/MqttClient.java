@@ -8,8 +8,8 @@ import reactor.netty.Connection;
  * 一个 Mqtt 客户端的基本功能：连接，断开连接，发布，订阅，解除订阅
  */
 public interface MqttClient {
-    Mono<? extends Connection> connect();
-    Mono<? extends Connection> connect(String host, int port);
+    Connection connect();
+    Connection connect(String host, int port);
     Mono<Void> disconnect();
 //    Mono<Void> publish(String topic, ByteBuf payload, MqttQoS qos, boolean retain);
     void on(String topic, MqttHandler handler, MqttQoS qos);
