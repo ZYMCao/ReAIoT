@@ -1,25 +1,25 @@
 package cn.easttrans.reaiot;
 
-import cn.easttrans.reaiot.mqtt.DefaultMqttClient;
-import cn.easttrans.reaiot.mqtt.MqttClient;
-import cn.easttrans.reaiot.mqtt.MqttClientConfig;
-import cn.easttrans.reaiot.mqtt.ReMqttClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3RxClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import reactor.core.publisher.Flux;
+import org.springframework.context.annotation.Bean;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SpringBootApplication
 @Slf4j
 public class ReAIoTApplication {
     private static final String SPRING_CONFIG_NAME_KEY = "--spring.config.name";
     private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "ReAIoT";
+    private static final int EASTTRANS_MQTT_PORT = 10006;
+    private static final String EASTTRANS_IOT_URL = "103.213.97.54";
+    private static final String CLIENT_ID = randomClientId(new Random());
 
     private static String[] updateArguments(String[] args) {
         if (Arrays.stream(args).noneMatch(arg -> arg.startsWith(SPRING_CONFIG_NAME_KEY))) {
@@ -33,44 +33,22 @@ public class ReAIoTApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
-        testReactiveClient();
+        log.info("MQTT Client, {}, is connecting to the MQTT Broker of {}:{}...", CLIENT_ID, EASTTRANS_IOT_URL, EASTTRANS_MQTT_PORT);
     }
 
-    private static void testHive() {
-        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
-        DefaultMqttClient defaultMqttClient = new DefaultMqttClient(localConfig);
-        var connection = defaultMqttClient.connect();
+    public static String randomClientId(Random random) {
+        final String[] options = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
+        return "ReAIoT_" + IntStream.range(0, 8)
+                .mapToObj(i -> options[random.nextInt(options.length)])
+                .collect(Collectors.joining());
     }
 
-    private static void testClient() {
-        MqttClientConfig localConfig = new MqttClientConfig("ReAIoT", "2.7182818e");
-        DefaultMqttClient defaultMqttClient = new DefaultMqttClient(localConfig);
-        var connection = defaultMqttClient.connect();
-
-        connection.inbound()
-                .receive()
-                .doOnNext(byteBuf ->
-                        log.info(byteBuf.toString())
-                )
-//                .doOnNext(byteBuf -> log.info("Received message: {}", byteBuf.toString(StandardCharsets.UTF_8)))
-                .then()
-                .subscribe();
-
-//        connection.onDispose()
-//                .block();
-    }
-
-    private static void testReactiveClient() {
-//        MqttClientConfig config = new MqttClientConfig("admin", "public");
-//        ReMqttClient reMqttClient = new ReMqttClient(config);
-//        reMqttClient.connect("iot.djzhgd.com", 10006);
-
-        MqttClientConfig config = new MqttClientConfig("P06dg3G1QdiTuemDjH3Q", null);
-        ReMqttClient reMqttClient = new ReMqttClient(config);
-        reMqttClient.connect("113.31.103.66", 1883);
-
-//        MqttClientConfig config = new MqttClientConfig("ReAIoT", "2.7182818e");
-//        ReMqttClient reMqttClient = new ReMqttClient(config);
-//        reMqttClient.connect("localhost", 1883);
+    @Bean
+    public Mqtt3RxClient mqtt3ReactorClient() {
+        return Mqtt3Client.builder()
+                .identifier(CLIENT_ID)
+                .serverHost(EASTTRANS_IOT_URL)
+                .serverPort(EASTTRANS_MQTT_PORT)
+                .buildRx();
     }
 }
