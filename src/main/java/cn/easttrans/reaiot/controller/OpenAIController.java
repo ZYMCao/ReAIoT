@@ -2,10 +2,6 @@ package cn.easttrans.reaiot.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,21 +20,21 @@ import reactor.core.scheduler.Schedulers;
 @RestController
 @Slf4j
 public class OpenAIController {
-    private final OpenAiChatModel openAiChatModel;
+//    private final OpenAiChatModel openAiChatModel;
 
-    @GetMapping("/userTextChat")
-    public Mono<String> textChat(@RequestParam(value = "userText") String userText) {
-        return Mono.fromCallable(() -> openAiChatModel.call(userText))
-                .doOnNext(log::info)
-                .subscribeOn(Schedulers.boundedElastic());
-    }
+//    @GetMapping("/userTextChat")
+//    public Mono<String> textChat(@RequestParam(value = "userText") String userText) {
+//        return Mono.fromCallable(() -> openAiChatModel.call(userText))
+//                .doOnNext(log::info)
+//                .subscribeOn(Schedulers.boundedElastic());
+//    }
 
-    @GetMapping("/systemAndUserTextChat")
-    public String textChatWithSystemMessage(@RequestParam(value = "systemText") String systemText,
-                                            @RequestParam(value = "userText") String userText) {
-        Message systemMessage = new SystemMessage(systemText);
-        Message userMessage = new UserMessage(userText);
-
-        return openAiChatModel.call(systemMessage, userMessage);
-    }
+//    @GetMapping("/systemAndUserTextChat")
+//    public String textChatWithSystemMessage(@RequestParam(value = "systemText") String systemText,
+//                                            @RequestParam(value = "userText") String userText) {
+//        Message systemMessage = new SystemMessage(systemText);
+//        Message userMessage = new UserMessage(userText);
+//
+//        return openAiChatModel.call(systemMessage, userMessage);
+//    }
 }
