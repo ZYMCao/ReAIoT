@@ -53,10 +53,10 @@
         <!--            <groupId>org.springframework.ai</groupId>-->
         <!--            <artifactId>spring-ai-cassandra-store-spring-boot-starter</artifactId>-->
         <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
+        </dependency>
 
         <!--        <dependency>-->
         <!--            <groupId>org.postgresql</groupId>-->
@@ -88,6 +88,12 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.projectreactor.addons</groupId>
+            <artifactId>reactor-adapter</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+
 
         <!-- MQTT -->
         <dependency>

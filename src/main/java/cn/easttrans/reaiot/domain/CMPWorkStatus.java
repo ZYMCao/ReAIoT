@@ -1,6 +1,7 @@
 package cn.easttrans.reaiot.domain;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import lombok.Getter;
@@ -29,14 +30,26 @@ public enum CMPWorkStatus {
             case 0 -> ONLINE;
             case 1 -> DOWN;
             case 2 -> UP;
-            default -> throw new IllegalArgumentException("CMPWorkStatus only accepts integers in range [1, 3]: " + raw);
+            default ->
+                    throw new IllegalArgumentException("CMPWorkStatus only accepts integers in range [0, 2]: " + raw);
+        };
+    }
+
+    public static CMPWorkStatus fromRaw(String raw) {
+        return switch (raw) {
+            case "0" -> ONLINE;
+            case "1" -> DOWN;
+            case "2" -> UP;
+            default -> throw new IllegalArgumentException("CMPWorkStatus only accepts String in range [0, 2]: " + raw);
         };
     }
 
     public static class Deserializer extends JsonDeserializer<CMPWorkStatus> {
         @Override
         public CMPWorkStatus deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            return CMPWorkStatus.fromRaw(parser.getIntValue());
+            return parser.currentToken().isNumeric() ?
+                    CMPWorkStatus.fromRaw(parser.getIntValue()) :
+                    CMPWorkStatus.fromRaw(parser.getText());
         }
     }
 }
