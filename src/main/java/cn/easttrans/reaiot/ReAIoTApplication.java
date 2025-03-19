@@ -1,8 +1,11 @@
 package cn.easttrans.reaiot;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
 
@@ -24,5 +27,9 @@ public class ReAIoTApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
+    }
+    @Bean
+    ChatMemory defaultMemory() {
+        return new InMemoryChatMemory();
     }
 }

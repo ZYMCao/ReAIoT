@@ -42,7 +42,7 @@ public class OpenAIController {
         return openAiChatModel.call(systemMessage, userMessage);
     }
 
-    @PostMapping("/chat")
+    @PostMapping("/completion")
     public ChatDto sendMessage(@RequestBody ChatDto request) {
         return new ChatDto(this.openAiChatModel.call(request.message()));
     }

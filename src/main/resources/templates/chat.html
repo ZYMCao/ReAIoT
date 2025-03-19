@@ -58,7 +58,7 @@
                     addMessage(message, true);
 
                     // 发送请求到后端
-                    fetch('http://localhost:7845/api/open-ai/chat', {
+                    fetch('http://localhost:7845/api/open-ai/completion', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({message: message})

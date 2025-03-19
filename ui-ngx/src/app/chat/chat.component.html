@@ -1,0 +1,18 @@
+<div class="chat-container">
+  <mat-toolbar color="primary">
+    <span>Chat UI</span>
+  </mat-toolbar>
+
+  <div class="chat-box">
+    <mat-form-field appearance="fill">
+      <mat-label>Enter message</mat-label>
+      <input matInput [(ngModel)]="message" placeholder="Type your message">
+    </mat-form-field>
+
+    <button mat-raised-button (click)="sendMessage()">Send</button>
+
+    <div *ngIf="response">
+      <p><strong>Response:</strong> {{ response }}</p>
+    </div>
+  </div>
+</div>
