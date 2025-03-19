@@ -1,6 +1,6 @@
 ## Ubuntu 的 JDK 17 + Cassandra 5 + Kafka 3.9
 
-#### 安装 JDK 17; https://adoptium.net/installation/linux/
+#### 安装 JDK 17 https://adoptium.net/installation/linux/
 
 ```
 apt install -y wget apt-transport-https gpg

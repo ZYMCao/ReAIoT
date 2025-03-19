@@ -1,5 +1,12 @@
 server:
   port: 7845
+
+logging:
+  level:
+    cn:
+      easttrans:
+        reaiot: TRACE
+
 spring:
   application:
     name: ReAIoT
@@ -10,30 +17,3 @@ spring:
       chat:
         options:
           model: "${DEEPSEEK_MODEL:deepseek-chat}" # deepseek-chat 或 deepseek-reasoner
-#  r2dbc:
-#    url: "${R2DBC_URL:r2dbc:postgresql://113.31.103.66:5432/thingsboard}"
-#    username: "${R2DBC_USERNAME:postgres}"
-#    password: "${R2DBC_PASSWORD:3.1415926Pi}"
-#  sql:
-#    init:
-#      mode: always
-#  data:
-#    cassandra:
-#      keyspace-name: "${CASSANDRA_KEYSPACE_NAME:thingsboard}"
-#      contact-points: "${CASSANDRA_URL:113.31.103.66:9042}"
-#      port: "${CASSANDRA_PORT:9042}"
-#      username: "${CASSANDRA_USERNAME:cassandra}"
-#      password: "${CASSANDRA_PASSWORD:cassandra}"
-#      schema-action: create_if_not_exists  # Options: create, create_if_not_exists, none, validate, drop
-#      local-datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"
-logging:
-  level:
-    cn:
-      easttrans:
-        reaiot: TRACE
-    io:
-      netty:
-        handler: TRACE
-    reactor:
-      netty:
-        channel: TRACE
