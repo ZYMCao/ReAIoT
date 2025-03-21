@@ -1,5 +1,7 @@
 package cn.easttrans.reaiot.domain.dto.beamconstruction;
 
+import java.io.Serializable;
+
 /**
  * 用户登录对象
  * @param username
@@ -11,5 +13,5 @@ public record LoginRequest(
         String password,
 //        String otherToken,
         String suffix
-) {
+) implements Serializable {
 }

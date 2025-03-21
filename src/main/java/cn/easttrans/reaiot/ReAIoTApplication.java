@@ -14,11 +14,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.BASE_URL_ENV;
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.PASSWORD_ENV;
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.SUFFIX_ENV;
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.USERNAME_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.BEAM.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+
 
 @SpringBootApplication
 @Slf4j
@@ -40,33 +40,29 @@ public class ReAIoTApplication {
         SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
     }
 
-    /**
-     * org.springframework.ai.chat.memory.ChatMemory 用于记录用户与LLM的对话内容。
-     */
     @Bean
     ChatMemory defaultMemory() {
         return new InMemoryChatMemory(); // ToDo: 替换为 org.springframework.ai.chat.memory.CassandraChatMemory 作持久化
     }
 
     @Bean
-    LoginRequest defaultLoginRequest(
-            @Value(USERNAME_ENV) String username,
-            @Value(PASSWORD_ENV) String password,
-            @Value(SUFFIX_ENV) String suffix
-    ) {
+    LoginRequest defaultLoginRequest(@Value(USERNAME_ENV) String username,
+                                     @Value(PASSWORD_ENV) String password,
+                                     @Value(SUFFIX_ENV) String suffix) {
         return new LoginRequest(username, password, suffix);
     }
 
-    /**
-     * 咖啡因作为本地缓存
-     */
     @Bean
     public Cache<String, String> defaultCache() {
-        return Caffeine.newBuilder().expireAfterWrite(55, MINUTES).maximumSize(1).build();
+        return Caffeine.newBuilder().expireAfterWrite(20, MINUTES).maximumSize(1).build();
     }
 
     @Bean
     public WebClient defaultHttpClient(@Value(BASE_URL_ENV) String baseUrl) {
-        return WebClient.builder().baseUrl(baseUrl).build();
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .defaultHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .defaultHeader("Projectid", "5853") // ToDo: 写死吗??
+                .build();
     }
 }

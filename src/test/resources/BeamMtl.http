@@ -1,0 +1,20 @@
+### 物料入库
+POST http://172.16.0.94:8081/pro_api/beamMtl/mtlStoragePage
+Content-Type: application/json;charset=UTF-8
+Authorization: eyJhbGciOiJIUzUxMiJ9.eyJsb2dpbl91c2VyX2tleSI6ImE3OTIyMDI1LTczNzAtNGQwZS1hMmFiLWM4MDNkNTFlYTZkYyJ9.nbc34PIpKBqnJM5tRzMY_bbAlEO80z7Ttk4nCfuxhszwIhTtsyT-R3eh-jpDuRQbYjnQtL00wIJn1SlbeEMyVQ
+Projectid: 5853
+
+{
+  "mtlName": "",
+  "pageNum": 1,
+  "pageSize": 10,
+  "specificationMode": "",
+  "total": 0
+}
+
+
+### 获取物料名称，规格型号
+GET http://172.16.0.94:8081/pro_api/beamCode/codeTree?types=WLMC,GGXH
+Authorization: eyJhbGciOiJIUzUxMiJ9.eyJsb2dpbl91c2VyX2tleSI6ImE3OTIyMDI1LTczNzAtNGQwZS1hMmFiLWM4MDNkNTFlYTZkYyJ9.nbc34PIpKBqnJM5tRzMY_bbAlEO80z7Ttk4nCfuxhszwIhTtsyT-R3eh-jpDuRQbYjnQtL00wIJn1SlbeEMyVQ
+Projectid: 5853
+

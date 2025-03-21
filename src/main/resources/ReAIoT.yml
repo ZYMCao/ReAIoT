@@ -5,7 +5,7 @@ logging:
   level:
     cn:
       easttrans:
-        reaiot: TRACE
+        reaiot: "${GLOBAL_LOG_LEVEL:INFO}"
 
 spring:
   application:

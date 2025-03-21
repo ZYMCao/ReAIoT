@@ -1,5 +1,7 @@
 package cn.easttrans.reaiot.domain.dto.beamconstruction;
 
+import java.io.Serializable;
+
 public record ZhgdSpecialEquVo(
 //        BigDecimal id, // 主键ID
 //        String code, // 设备编码
@@ -13,5 +15,5 @@ public record ZhgdSpecialEquVo(
 //        String startTime, // 开始时间
 //        String endTime, // 结束时间
         String zhgdDeptId // 标段ID
-) {
+) implements Serializable {
 }

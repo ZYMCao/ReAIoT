@@ -12,29 +12,25 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.BASE_URL_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 
 @Service
 @Slf4j
 public class SysLoginService extends AbstractBeamConstructionService {
     private final WebClient httpClient;
     private final LoginRequest loginRequest;
-    private final Cache<String, String> cache;
     private final AtomicReference<Mono<String>> tokenRequestRef = new AtomicReference<>();
     private static final String AUTH_TOKEN = "authToken";
 
     @Autowired
-    protected SysLoginService(
-            @Value(BASE_URL_ENV) String baseUrl,
-            WebClient webClient,
-            LoginRequest loginRequest,
-            Cache<String, String> cache
-    ) {
-        super(baseUrl);
+    protected SysLoginService(@Value(BASE_URL_ENV) String baseUrl,
+                              Cache<String, String> cache,
+                              WebClient webClient,
+                              LoginRequest loginRequest) {
+        super(baseUrl, cache);
         this.httpClient = webClient;
         this.loginRequest = loginRequest;
-        this.cache = cache;
-        this.getToken().subscribe(token -> log.info("获取token: {}", token));
+        this.getToken().subscribe(token -> log.debug("Token obtained from {}{} is: {}", baseUrl, LOGIN, token));
     }
 
     public Mono<LoginResponse> login(LoginRequest loginRequest) {

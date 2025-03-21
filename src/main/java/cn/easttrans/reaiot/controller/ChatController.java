@@ -21,8 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.OpenAI.BASE_URL_ENV;
-import static cn.easttrans.reaiot.EnvironmentalConstants.OpenAI.SYS_PROMPT_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 /**

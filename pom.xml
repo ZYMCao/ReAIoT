@@ -10,9 +10,9 @@
     </parent>
     <groupId>cn.easttrans</groupId>
     <artifactId>ReAIoT</artifactId>
-    <version>0.0.2</version>
+    <version>0.1.Beam</version>
     <name>ReAIoT</name>
-    <description>ReAIoT</description>
+    <description>响应式人工智能物联网</description>
     <url/>
 
     <developers>
