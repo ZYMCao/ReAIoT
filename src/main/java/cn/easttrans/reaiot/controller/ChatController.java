@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static cn.easttrans.reaiot.EnvironmentalConstants.OpenAI.BASE_URL_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.OpenAI.SYS_PROMPT_ENV;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 /**
@@ -38,8 +40,8 @@ public class ChatController {
     private final Map<String, ChatMemory> chatMemories = new ConcurrentHashMap<>();
 
     @Autowired
-    public ChatController(@Value("classpath:/prompts/system-message.st") Resource systemPrompt,
-                          @Value("${spring.ai.openai.base-url}") String urlLLM,
+    public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
+                          @Value(BASE_URL_ENV) String urlLLM,
                           ChatModel chatModel) {
         this.systemPrompt = systemPrompt;
         this.chatModel = chatModel;

@@ -17,3 +17,11 @@ spring:
       chat:
         options:
           model: "${DEEPSEEK_MODEL:deepseek-chat}" # deepseek-chat 或 deepseek-reasoner
+
+easttrans:
+  # 梁场
+  beam-construction:
+    base-url: "${BEAM_CONSTRUCTION_BASE_URL:https://172.16.0.94:8081/pro_api}" # http://nylc.jszhnl.com/pro_api
+    username: "${BEAM_CONSTRUCTION_USERNAME}"
+    password: "${BEAM_CONSTRUCTION_PASSWORD}"
+    suffix: "${BEAM_CONSTRUCTION_SUFFIX:login_njlc}"
