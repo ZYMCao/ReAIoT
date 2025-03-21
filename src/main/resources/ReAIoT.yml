@@ -21,7 +21,7 @@ spring:
 easttrans:
   # 梁场
   beam-construction:
-    base-url: "${BEAM_CONSTRUCTION_BASE_URL:https://172.16.0.94:8081/pro_api}" # http://nylc.jszhnl.com/pro_api
+    base-url: "${BEAM_CONSTRUCTION_BASE_URL:http://172.16.0.94:8081/pro_api}" # http://nylc.jszhnl.com/pro_api
     username: "${BEAM_CONSTRUCTION_USERNAME}"
     password: "${BEAM_CONSTRUCTION_PASSWORD}"
     suffix: "${BEAM_CONSTRUCTION_SUFFIX:login_njlc}"

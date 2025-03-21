@@ -34,7 +34,7 @@ public class SysLoginService extends AbstractBeamConstructionService {
         this.httpClient = webClient;
         this.loginRequest = loginRequest;
         this.cache = cache;
-//        getToken().subscribe(token -> log.info("获取token: {}", token));
+        this.getToken().subscribe(token -> log.info("获取token: {}", token));
     }
 
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
