@@ -2,14 +2,19 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, ViewChi
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MarkdownService } from 'ngx-markdown';
 import { ChatService } from '../../services/chat.service';
-import { NgForOf, NgIf } from '@angular/common';
+import { CommonModule, NgClass, NgForOf } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'app-chat-content',
-  imports: [NgIf, NgForOf],
+  imports: [CommonModule, NgForOf, NgClass, MatIcon, MatIconButton, MatCard, MatCardContent, MatFormField, MatInput],
   templateUrl: './chat-content.component.html',
   standalone: true,
-  styleUrl: './chat-content.component.css'
+  styleUrl: './chat-content.component.scss'
 })
 export class ChatContentComponent implements OnInit, AfterViewChecked, AfterViewInit {
   constructor(
@@ -19,8 +24,8 @@ export class ChatContentComponent implements OnInit, AfterViewChecked, AfterView
   ) {
   }
 
-  protected isBusy: boolean = false;
   public messages: any[] = [];
+  protected isBusy: boolean = false;
   @ViewChild('textInput', {static: true}) textInputRef!: ElementRef;
 
   ngAfterViewChecked(): void {

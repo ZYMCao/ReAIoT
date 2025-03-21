@@ -7,7 +7,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   standalone: true,
   imports: [ChatContentComponent, SidebarComponent],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css'
+  styleUrl: './chat.component.scss'
 })
 export class ChatComponent {
   constructor() {

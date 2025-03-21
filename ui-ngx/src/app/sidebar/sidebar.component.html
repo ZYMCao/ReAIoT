@@ -1,117 +1,23 @@
-<button
-  data-drawer-target="separator-sidebar"
-  data-drawer-toggle="separator-sidebar"
-  aria-controls="separator-sidebar"
-  type="button"
-  class="inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600 absolute"
->
-  <span class="sr-only">Open sidebar</span>
-  <svg
-    class="w-6 h-6"
-    aria-hidden="true"
-    fill="currentColor"
-    viewBox="0 0 20 20"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      clip-rule="evenodd"
-      fill-rule="evenodd"
-      d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-    ></path>
-  </svg>
-</button>
-
-<aside
-  id="separator-sidebar"
-  class="fixed top-0 left-0 z-40 w-80 h-screen transition-transform -translate-x-full sm:translate-x-0"
-  aria-label="Sidebar"
->
-  <div class="h-full px-3 py-4 bg-[#0f172abf] text-white">
-    <ul class="space-y-2 font-medium overflow-auto h-4/5">
-      <li (click)="addNewChat()" class="cursor-pointer">
-        <a
-          class="flex items-center p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black border border-white/75"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-circle-plus"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
-            <path d="M9 12l6 0"></path>
-            <path d="M12 9l0 6"></path>
-          </svg>
-          <span class="ml-3">New Chat</span>
-        </a>
-      </li>
-      <div *ngIf="chatHistories.chatHistoryDetails.length > 0">
-        <!-- <div *ngFor="let i of [].constructor(totalChatConversation)"> -->
-        <div *ngFor="let chatDetails of chatHistories.chatHistoryDetails" id="chatConversation">
-          <li
-            [attr.data-uuid]="chatDetails.id"
-            class="flex justify-between cursor-pointer"
-          >
-            <a
-              class="flex items-center w-full p-2 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-black"
-              (click)="getHistoryChatMessages(chatDetails.id)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-history"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M12 8l0 4l2 2"></path>
-                <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"></path>
-              </svg>
-              <span class="flex-1 ml-3 whitespace-nowrap">{{
-                  chatDetails.title
-                }}</span>
-            </a>
-            <button (click)="deleteHistoricalChat(chatDetails.id)">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-trash-filled"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007h16z"
-                  stroke-width="0"
-                  fill="currentColor"
-                ></path>
-                <path
-                  d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005h4z"
-                  stroke-width="0"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </button>
-          </li>
-        </div>
-      </div>
-    </ul>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h3>Chats</h3>
+    <button mat-icon-button color="primary" (click)="addNewChat()">
+      <mat-icon>add</mat-icon>
+    </button>
   </div>
-</aside>
+
+  <div class="chat-history" *ngIf="chatHistories.chatHistoryDetails.length > 0; else noHistory">
+    <mat-list>
+      <mat-list-item *ngFor="let chat of chatHistories.chatHistoryDetails" (click)="getHistoryChatMessages(chat.id)">
+        <span mat-line>{{ chat.title }}</span>
+        <button mat-icon-button (click)="deleteHistoricalChat(chat.id); $event.stopPropagation();">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </div>
+
+  <ng-template #noHistory>
+    <p class="no-history">No chat history available.</p>
+  </ng-template>
+</div>

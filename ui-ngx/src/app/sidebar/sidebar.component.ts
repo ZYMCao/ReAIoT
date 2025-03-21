@@ -5,13 +5,17 @@ import { ChatDataService } from '../services/chat-data.service';
 import { ChatCompletionMessage } from 'openai/resources';
 import { v4 as uuidv4 } from 'uuid';
 import { NgForOf, NgIf } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatList, MatListItem } from '@angular/material/list';
+import { MatIconButton } from '@angular/material/button';
+import { MatLine } from '@angular/material/core';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [NgIf, NgForOf],
+  imports: [NgIf, NgForOf, MatIcon, MatList, MatListItem, MatIconButton, MatLine],
   templateUrl: './sidebar.component.html',
   standalone: true,
-  styleUrl: './sidebar.component.css'
+  styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit {
   constructor(
@@ -50,7 +54,8 @@ export class SidebarComponent implements OnInit {
   protected async addNewChat() {
     if (!this.isHistoricalChat) {
       const chatHistoryId = uuidv4();
-      const title = (await this.chatService.getTitleFromChatGpt(this.messages)).choices[0].message?.content!;
+      const title = 'Title ' + chatHistoryId;
+      // const title = (await this.chatService.getTitleFromChatGpt(this.messages)).choices[0].message?.content!;
 
       const chatHistory: ChatHistoryDetails = {
         id: chatHistoryId,
