@@ -5,7 +5,7 @@ Authorization: {{token}}
 Projectid: 5853
 
 {
-  "mtlName": "",
+  "mtlName": "01",
   "pageNum": 1,
   "pageSize": 10,
   "specificationMode": "",
@@ -13,8 +13,8 @@ Projectid: 5853
 }
 
 
-### 获取物料名称，规格型号
-GET {{baseUrl}}/beamCode/codeTree?types=WLMC,GGXH
+### 获取物料名称，规格型号 WLMC,GGXH
+GET {{baseUrl}}/beamCode/codeTree?types=WLMC
 Authorization: {{token}}
 Projectid: 5853
 

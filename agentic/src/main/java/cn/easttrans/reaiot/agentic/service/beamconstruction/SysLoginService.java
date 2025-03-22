@@ -3,6 +3,8 @@ package cn.easttrans.reaiot.agentic.service.beamconstruction;
 import cn.easttrans.reaiot.agentic.EnvironmentalConstants;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginResponse;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -24,10 +27,11 @@ public class SysLoginService extends AbstractBeamConstructionService {
     protected SysLoginService(@Value(EnvironmentalConstants.BEAM.BASE_URL_ENV) String baseUrl,
                               Cache<String, String> cache,
                               WebClient webClient,
+                              ObjectMapper objectMapper,
                               LoginRequest loginRequest) {
-        super(baseUrl, cache, webClient);
+        super(baseUrl, cache, webClient, objectMapper);
         this.loginRequest = loginRequest;
-        this.getToken().subscribe(token -> log.debug("Token obtained from {}{} is: {}", baseUrl, LOGIN, token));
+        this.getToken().subscribe();
     }
 
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
@@ -35,7 +39,11 @@ public class SysLoginService extends AbstractBeamConstructionService {
                 .uri(LOGIN)
                 .bodyValue(loginRequest)
                 .retrieve()
-                .bodyToMono(LoginResponse.class);
+                .bodyToMono(JsonNode.class)
+                .doOnError(IOException.class, e -> log.error("Error occurred while parsing JSON response from {}{}: {}", baseUrl, LOGIN, e.getMessage()))
+                .doOnNext(json -> log.debug("Parsing json received from {}{} ...", baseUrl, LOGIN))
+                .flatMap(json -> this.parseJsonResponse(json, LoginResponse.class))
+                .doOnNext(res -> log.debug("Token obtained from {}{} is: {}", baseUrl, LOGIN, res.token()));
     }
 
     public Mono<String> getToken() {
