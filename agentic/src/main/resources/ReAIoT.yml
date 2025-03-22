@@ -11,6 +11,7 @@ logging:
 spring:
   application:
     name: ReAIoT
+    title: Agentic Artificial Intelligence built on DeepSeek
   ai:
     openai: # https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html
       api-key: "${DEEPSEEK_API_KEY}"

@@ -33,13 +33,16 @@ public class BeamMtlService extends AbstractBeamConstructionService {
                           SysLoginService sysLoginService) {
         super(baseUrl, cache, webClient);
         this.sysLoginService = sysLoginService;
-        this.codeTree().subscribe(res -> log.info("物料名称 and 规格型号 obtained from {}{} are: {}", baseUrl, BEAM_MATERIAL_STORAGE, res));
+        this.codeTree().subscribe(res -> log.debug("物料名称 and 规格型号 obtained from {}{} are: {}", baseUrl, BEAM_MATERIAL_STORAGE, res));
     }
 
     public Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request) {
         return sysLoginService.getToken().flatMap(token -> this.mtlStoragePage(request, token));
     }
 
+    /**
+     * /beamMtl/mtlStoragePage
+     */
     private Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request, String token) {
         return httpClient.post()
                 .uri(BEAM_MATERIAL_STORAGE)
@@ -61,6 +64,9 @@ public class BeamMtlService extends AbstractBeamConstructionService {
         return sysLoginService.getToken().flatMap(token -> this.codeTree(queryParams, token));
     }
 
+    /**
+     * /beamCode/codeTree
+     */
     private Mono<Result<List<BeamCodeType>>> codeTree(MultiValueMap<String, String> queryParams, String token) {
         return httpClient.get()
                 .uri(uriBuilder -> uriBuilder

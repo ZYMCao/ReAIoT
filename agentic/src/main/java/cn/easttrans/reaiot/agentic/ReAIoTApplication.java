@@ -62,7 +62,13 @@ public class ReAIoTApplication {
     @Bean
     public ObjectMapper defaultObjectMapper() {
         return new ObjectMapper()
-                .configure(ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true) //
+                /*
+                Fix: JSON decoding error: Cannot coerce empty String ("") to element of `BeamCodeValue[]`
+                 */
+                .configure(ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+                /*
+                Fix: org.springframework.core.codec.DecodingException: JSON decoding error: Unrecognized field msg (class LoginResponse)
+                 */
                 .configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 

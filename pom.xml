@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.8</version>
+        <version>3.3.10</version>
         <relativePath/>
     </parent>
     <groupId>cn.easttrans</groupId>
@@ -30,10 +30,29 @@
         </developer>
     </developers>
 
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring-ai.version>1.0.0-M6</spring-ai.version>
+        <lombok.version>1.18.32</lombok.version>
+    </properties>
+
     <modules>
         <!--        <module>common</module>-->
         <module>agentic</module>
         <!--        <module>mqtt</module>-->
         <!--        <module>ui-ngx</module>-->
     </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
