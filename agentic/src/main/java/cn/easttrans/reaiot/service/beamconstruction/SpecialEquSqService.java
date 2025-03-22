@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.Beam.BASE_URL_ENV;
+import static cn.easttrans.reaiot.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 
 /**
  * 特种设备
