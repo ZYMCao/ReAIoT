@@ -3,7 +3,6 @@ package cn.easttrans.reaiot.agentic;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 
 @SpringBootApplication
-@Slf4j
 public class ReAIoTApplication {
     private static final String SPRING_CONFIG_NAME_KEY = "--spring.config.name";
     private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "ReAIoT";

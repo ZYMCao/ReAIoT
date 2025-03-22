@@ -2,7 +2,6 @@ package cn.easttrans.reaiot.agentic.domain.dto.beamconstruction;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 
 public record BeamCodeValue(
         String id,
@@ -13,7 +12,7 @@ public record BeamCodeValue(
         String codeName, // 码值名称
         String unit, // 单位
         long sortNo, // 序号
-        List<BeamCodeValue> childrenList
+        BeamCodeValue[] childrenList
 ) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

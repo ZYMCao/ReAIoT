@@ -1,5 +1,6 @@
 package cn.easttrans.reaiot.agentic.service.beamconstruction;
 
+import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.BeamCodeType;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.MtlStorage;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.MtlStoragePageRequest;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.Page;
@@ -11,6 +12,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -31,7 +34,12 @@ public class BeamMtlService extends AbstractBeamConstructionService {
         this.sysLoginService = sysLoginService;
     }
 
-    public Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request, String token) {
+    public Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request) {
+        return sysLoginService.getToken()
+                .flatMap(token -> this.mtlStoragePage(request, token));
+    }
+
+    private Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request, String token) {
         return httpClient.post()
                 .uri(BEAM_MATERIAL_STORAGE)
                 .header(AUTHORIZATION, token)
@@ -45,5 +53,26 @@ public class BeamMtlService extends AbstractBeamConstructionService {
                 });
     }
 
-//    public Mono<Result<List<BeamCodeType>>>
+    public Mono<Result<List<BeamCodeType>>> codeTree() {
+        final String types = "WLMC,GGXH"; // 物料名称，规格型号
+        return sysLoginService.getToken()
+                .flatMap(token -> this.codeTree(types, token));
+    }
+
+    private Mono<Result<List<BeamCodeType>>> codeTree(String types, String token) {
+        return httpClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(CODE_TREE)
+                        .queryParam("types", types)
+                        .build())
+                .header(AUTHORIZATION, token)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Result<List<BeamCodeType>>>() {
+                })
+                .onErrorResume(e -> {
+                    log.error("Fail to fetch and parse data from {}{}: ", baseUrl, CODE_TREE, e);
+                    return Mono.just(new Result<>(e.getMessage(), INTERNAL_SERVER_ERROR.value(), null));
+                });
+    }
+
 }
