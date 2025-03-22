@@ -12,8 +12,8 @@
 
   <groupId>cn.easttrans.reaiot</groupId>
   <artifactId>ui-ngx</artifactId>
-  <version>0.1.Beam</version>
   <name>UI Angular Next Generation</name>
+  <description>Credit to yagizhanNY</description>
 
   <properties>
     <maven.compiler.source>21</maven.compiler.source>

@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.service.beamconstruction;
+package cn.easttrans.reaiot.agentic.service.beamconstruction;
 
 import com.github.benmanes.caffeine.cache.Cache;
 

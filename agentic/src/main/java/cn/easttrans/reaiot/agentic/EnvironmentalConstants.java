@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot;
+package cn.easttrans.reaiot.agentic;
 
 /**
  * 环境常量

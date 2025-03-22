@@ -1,7 +1,8 @@
-package cn.easttrans.reaiot.service.beamconstruction;
+package cn.easttrans.reaiot.agentic.service.beamconstruction;
 
-import cn.easttrans.reaiot.domain.dto.beamconstruction.LoginRequest;
-import cn.easttrans.reaiot.domain.dto.beamconstruction.LoginResponse;
+import cn.easttrans.reaiot.agentic.EnvironmentalConstants;
+import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
+import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginResponse;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.BEAM.BASE_URL_ENV;
-
 @Service
 @Slf4j
 public class SysLoginService extends AbstractBeamConstructionService {
@@ -23,7 +22,7 @@ public class SysLoginService extends AbstractBeamConstructionService {
     private static final String AUTH_TOKEN = "authToken";
 
     @Autowired
-    protected SysLoginService(@Value(BASE_URL_ENV) String baseUrl,
+    protected SysLoginService(@Value(EnvironmentalConstants.BEAM.BASE_URL_ENV) String baseUrl,
                               Cache<String, String> cache,
                               WebClient webClient,
                               LoginRequest loginRequest) {

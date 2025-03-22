@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot;
+package cn.easttrans.reaiot.agentic;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

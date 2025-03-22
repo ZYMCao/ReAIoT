@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.controller;
+package cn.easttrans.reaiot.agentic.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

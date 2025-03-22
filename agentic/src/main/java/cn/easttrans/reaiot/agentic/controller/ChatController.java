@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.controller;
+package cn.easttrans.reaiot.agentic.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -21,8 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
-import static cn.easttrans.reaiot.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 /**

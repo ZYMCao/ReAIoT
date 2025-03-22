@@ -1,6 +1,4 @@
-package cn.easttrans.reaiot.domain.dto.beamconstruction;
-
-import org.springframework.http.HttpStatus;
+package cn.easttrans.reaiot.agentic.domain.dto.beamconstruction;
 
 import java.io.Serial;
 import java.io.Serializable;

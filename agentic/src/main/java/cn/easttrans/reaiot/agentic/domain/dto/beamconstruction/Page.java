@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.domain.dto.beamconstruction;
+package cn.easttrans.reaiot.agentic.domain.dto.beamconstruction;
 
 import java.io.Serializable;
 import java.util.List;

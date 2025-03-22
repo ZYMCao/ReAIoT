@@ -12,7 +12,6 @@
 
     <groupId>cn.easttrans.reaiot</groupId>
     <artifactId>common</artifactId>
-    <version>0.1.Beam</version>
     <name>Common</name>
 
     <properties>

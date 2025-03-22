@@ -1,6 +1,6 @@
-package cn.easttrans.reaiot;
+package cn.easttrans.reaiot.agentic;
 
-import cn.easttrans.reaiot.domain.dto.beamconstruction.LoginRequest;
+import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 
-import static cn.easttrans.reaiot.EnvironmentalConstants.BEAM.*;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.*;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;

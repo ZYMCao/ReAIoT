@@ -31,9 +31,9 @@
     </developers>
 
     <modules>
-        <module>common</module>
+        <!--        <module>common</module>-->
         <module>agentic</module>
-        <module>mqtt</module>
-        <module>ui-ngx</module>
+        <!--        <module>mqtt</module>-->
+        <!--        <module>ui-ngx</module>-->
     </modules>
 </project>
