@@ -13,13 +13,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 @Slf4j
 public class SpecialEquSqService extends AbstractBeamConstructionService {
-    private final WebClient httpClient;
 
     public SpecialEquSqService(@Value(EnvironmentalConstants.BEAM.BASE_URL_ENV) String baseUrl,
                                   Cache<String, String> cache,
                                   WebClient webClient) {
-        super(baseUrl, cache);
-        this.httpClient = webClient;
+        super(baseUrl, cache, webClient);
     }
 
 }

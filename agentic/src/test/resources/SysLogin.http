@@ -1,12 +1,10 @@
 ### login
-POST http://172.16.0.94:8081/pro_api/login
+POST {{baseUrl}}/login
 Content-Type: application/json;charset=UTF-8
 
-
 {
-  "username": "nylcsuper",
-  "password": "nylc@888888",
+  "username": "{{username}}",
+  "password": "{{password}}",
   "suffix": "login_njlc",
   "token": false
 }
-

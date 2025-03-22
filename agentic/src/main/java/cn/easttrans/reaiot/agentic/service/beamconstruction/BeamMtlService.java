@@ -10,10 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -22,21 +25,19 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @Service
 @Slf4j
 public class BeamMtlService extends AbstractBeamConstructionService {
-    private final WebClient httpClient;
     private final SysLoginService sysLoginService;
 
     public BeamMtlService(@Value(BASE_URL_ENV) String baseUrl,
                           Cache<String, String> cache,
                           WebClient webClient,
                           SysLoginService sysLoginService) {
-        super(baseUrl, cache);
-        this.httpClient = webClient;
+        super(baseUrl, cache, webClient);
         this.sysLoginService = sysLoginService;
+        this.codeTree().subscribe(res -> log.info("物料名称 and 规格型号 obtained from {}{} are: {}", baseUrl, BEAM_MATERIAL_STORAGE, res));
     }
 
     public Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request) {
-        return sysLoginService.getToken()
-                .flatMap(token -> this.mtlStoragePage(request, token));
+        return sysLoginService.getToken().flatMap(token -> this.mtlStoragePage(request, token));
     }
 
     private Mono<Result<Page<MtlStorage>>> mtlStoragePage(MtlStoragePageRequest request, String token) {
@@ -54,16 +55,17 @@ public class BeamMtlService extends AbstractBeamConstructionService {
     }
 
     public Mono<Result<List<BeamCodeType>>> codeTree() {
-        final String types = "WLMC,GGXH"; // 物料名称，规格型号
-        return sysLoginService.getToken()
-                .flatMap(token -> this.codeTree(types, token));
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>(
+                Map.of("types", List.of("WLMC", "GGXH")) // 物料名称，规格型号
+        );
+        return sysLoginService.getToken().flatMap(token -> this.codeTree(queryParams, token));
     }
 
-    private Mono<Result<List<BeamCodeType>>> codeTree(String types, String token) {
+    private Mono<Result<List<BeamCodeType>>> codeTree(MultiValueMap<String, String> queryParams, String token) {
         return httpClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(CODE_TREE)
-                        .queryParam("types", types)
+                        .queryParams(queryParams)
                         .build())
                 .header(AUTHORIZATION, token)
                 .retrieve()
@@ -74,5 +76,4 @@ public class BeamMtlService extends AbstractBeamConstructionService {
                     return Mono.just(new Result<>(e.getMessage(), INTERNAL_SERVER_ERROR.value(), null));
                 });
     }
-
 }

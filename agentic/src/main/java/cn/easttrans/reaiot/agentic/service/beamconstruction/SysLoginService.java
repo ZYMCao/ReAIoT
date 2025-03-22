@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Service
 @Slf4j
 public class SysLoginService extends AbstractBeamConstructionService {
-    private final WebClient httpClient;
     private final LoginRequest loginRequest;
     private final AtomicReference<Mono<String>> tokenRequestRef = new AtomicReference<>();
     private static final String AUTH_TOKEN = "authToken";
@@ -26,8 +25,7 @@ public class SysLoginService extends AbstractBeamConstructionService {
                               Cache<String, String> cache,
                               WebClient webClient,
                               LoginRequest loginRequest) {
-        super(baseUrl, cache);
-        this.httpClient = webClient;
+        super(baseUrl, cache, webClient);
         this.loginRequest = loginRequest;
         this.getToken().subscribe(token -> log.debug("Token obtained from {}{} is: {}", baseUrl, LOGIN, token));
     }
