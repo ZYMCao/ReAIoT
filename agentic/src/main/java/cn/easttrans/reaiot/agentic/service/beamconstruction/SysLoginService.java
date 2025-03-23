@@ -1,6 +1,5 @@
 package cn.easttrans.reaiot.agentic.service.beamconstruction;
 
-import cn.easttrans.reaiot.agentic.EnvironmentalConstants;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginResponse;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +15,8 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
+
 @Service
 @Slf4j
 public class SysLoginService extends AbstractBeamConstructionService {
@@ -24,7 +25,7 @@ public class SysLoginService extends AbstractBeamConstructionService {
     private static final String AUTH_TOKEN = "authToken";
 
     @Autowired
-    protected SysLoginService(@Value(EnvironmentalConstants.BEAM.BASE_URL_ENV) String baseUrl,
+    protected SysLoginService(@Value(BASE_URL_ENV) String baseUrl,
                               Cache<String, String> cache,
                               WebClient webClient,
                               ObjectMapper objectMapper,

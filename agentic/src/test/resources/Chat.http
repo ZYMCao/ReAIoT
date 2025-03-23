@@ -1,0 +1,4 @@
+### 对话
+POST http://localhost:7845/api/chat/dialog/1453?question=梁场的物料现在是什么情况
+
+

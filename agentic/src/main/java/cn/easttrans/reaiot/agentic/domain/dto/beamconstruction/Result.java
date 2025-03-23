@@ -9,9 +9,4 @@ import java.io.Serializable;
 public record Result<T>(String msg, int code, T data) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
-    public static <T> Result<T> error(String msg) {
-        return new Result<>(msg, 201, null);
-    }
-
 }

@@ -1,5 +1,6 @@
 package cn.easttrans.reaiot.agentic.controller;
 
+import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -38,14 +39,19 @@ public class ChatController {
     private final ChatModel chatModel;
     private final String urlLLM;
     private final Map<String, ChatMemory> chatMemories = new ConcurrentHashMap<>();
+    private final BeamMtlService beamMtlService;
+    private final String LLM_CALL_ERROR;
 
     @Autowired
     public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
                           @Value(BASE_URL_ENV) String urlLLM,
-                          ChatModel chatModel) {
+                          ChatModel chatModel,
+                          BeamMtlService beamMtlService) {
         this.systemPrompt = systemPrompt;
         this.chatModel = chatModel;
         this.urlLLM = urlLLM;
+        this.beamMtlService = beamMtlService;
+        this.LLM_CALL_ERROR = "Fail to connect to " + urlLLM + "!!";
     }
 
     @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
@@ -54,9 +60,10 @@ public class ChatController {
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
+                .defaultTools(beamMtlService)
                 .build();
 
-        String LLM_CALL_ERROR = "Fail to connect to " + urlLLM + " ...";
+
         return chatClient.prompt()
                 .user(question)
                 .system(systemPrompt)

@@ -12,7 +12,7 @@
 
     <groupId>cn.easttrans.reaiot</groupId>
     <artifactId>mqtt</artifactId>
-    <name>MQTT Reactive Client built on Netty</name>
+    <name>MQTT Reactive Client built on Reactor Netty</name>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

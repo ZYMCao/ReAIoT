@@ -2,6 +2,7 @@ package cn.easttrans.reaiot.agentic;
 
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -24,9 +25,9 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
 
 @SpringBootApplication
-public class ReAIoTApplication {
+public class AgenticApplication {
     private static final String SPRING_CONFIG_NAME_KEY = "--spring.config.name";
-    private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "ReAIoT";
+    private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "agentic";
 
     private static String[] updateArguments(String[] args) {
         if (Arrays.stream(args).noneMatch(arg -> arg.startsWith(SPRING_CONFIG_NAME_KEY))) {
@@ -39,7 +40,7 @@ public class ReAIoTApplication {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(ReAIoTApplication.class, updateArguments(args));
+        SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
     @Bean
