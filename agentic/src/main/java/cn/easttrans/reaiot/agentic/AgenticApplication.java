@@ -1,12 +1,15 @@
 package cn.easttrans.reaiot.agentic;
 
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
+import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.tool.ToolCallbackProvider;
+import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -81,5 +84,10 @@ public class AgenticApplication {
                 .defaultHeader("Projectid", "5853") // ToDo: 写死吗??
                 .codecs(configurer -> configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper)))
                 .build();
+    }
+
+    @Bean
+    public ToolCallbackProvider beamMtlServiceTools(BeamMtlService beamMtlService) {
+        return MethodToolCallbackProvider.builder().toolObjects(beamMtlService).build();
     }
 }

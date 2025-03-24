@@ -1,18 +1,17 @@
 server:
   port: 7845
 
-logging:
-  level:
-    cn:
-      easttrans:
-        reaiot:
-          agentic: "${GLOBAL_LOG_LEVEL:INFO}"
-
 spring:
   application:
     name: ReAIoT
     title: Agentic Artificial Intelligence built on DeepSeek
   ai:
+    mcp:
+      server:
+        name: reaiot-mcp-server
+        version: 0.1.Beam
+        type: ASYNC
+        sse-message-endpoint: /mcp/messages
     openai: # https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html
       api-key: "${DEEPSEEK_API_KEY}"
       base-url: "${DEEPSEEK_BASE_URL:https://api.deepseek.com}" # 深度求索

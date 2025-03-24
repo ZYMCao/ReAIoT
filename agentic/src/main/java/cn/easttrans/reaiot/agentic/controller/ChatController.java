@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,6 +42,7 @@ public class ChatController {
     private final Map<String, ChatMemory> chatMemories = new ConcurrentHashMap<>();
     private final BeamMtlService beamMtlService;
     private final String LLM_CALL_ERROR;
+    private final String beamMaterialInfo;
 
     @Autowired
     public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
@@ -52,6 +54,8 @@ public class ChatController {
         this.urlLLM = urlLLM;
         this.beamMtlService = beamMtlService;
         this.LLM_CALL_ERROR = "Fail to connect to " + urlLLM + "!!";
+
+        beamMaterialInfo = Arrays.toString(beamMtlService.materialStorage(100));
     }
 
     @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
@@ -60,12 +64,13 @@ public class ChatController {
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-                .defaultTools(beamMtlService)
+//                .defaultTools(beamMtlService)
                 .build();
 
 
+        String realQuestion = question + "## 宁盐梁场的最近的物料入库信息: " + beamMaterialInfo + "## 宁盐梁场的最近的物料存量信息: ";
         return chatClient.prompt()
-                .user(question)
+                .user(realQuestion)
                 .system(systemPrompt)
                 .stream()
                 .content()

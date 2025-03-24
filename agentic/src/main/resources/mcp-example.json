@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pig-issue": {
+      "isActive": true,
+      "command": "java",
+      "args": [
+        "-Dspring.ai.mcp.server.stdio=true",
+        "-DBEAM_CONSTRUCTION_USERNAME=nylcsuper",
+        "-DBEAM_CONSTRUCTION_PASSWORD=nylc@888888",
+        "-jar",
+        "D:\\IdeaProjects\\ReAIoT\\agentic\\target\\agentic-0.1.Beam.jar"
+      ]
+    }
+  }
+}
