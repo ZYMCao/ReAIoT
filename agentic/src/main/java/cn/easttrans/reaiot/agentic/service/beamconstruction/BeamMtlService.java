@@ -82,23 +82,23 @@ public class BeamMtlService extends AbstractBeamConstructionService {
                 .doOnNext(this::logMtlStorages);
     }
 
-    @Tool(description = "Fetch 100 data of building materials most recently warehoused")
+    //    @Tool(description = "Fetch 100 data of building materials most recently warehoused")
     public MtlStorage[] materialStorage100() {
         MtlStorage[] materials = this.materialStorage(new MtlStoragePageRequest(100)).block();
         log.debug("Tool materialStorage is called: {}", null == materials ? "" : Arrays.toString(materials));
         return materials;
     }
 
-//    @Tool(description = "Fetch data of building materials most recently warehoused")
+    //    @Tool(description = "Fetch data of building materials most recently warehoused")
     public MtlStorage[] materialStorage(@ToolParam(description = "the amount of rows of data to be fetched") int size) {
         MtlStorage[] materials = this.materialStorage(new MtlStoragePageRequest(size)).block();
         log.debug("Tool materialStorage is called: {}", null == materials ? "" : Arrays.toString(materials));
         return materials;
     }
 
-//    @Tool(description = "Fetch data of building materials most recently warehoused")
+    //    @Tool(description = "Fetch data of building materials most recently warehoused")
     public MtlStorage[] materialStorageByCode(@ToolParam(description = "integer indicating the amount of rows of data to be fetched") int size,
-                                        @ToolParam(description = "codeValue, whose enumerations can be fetched by 'codeMaterial', used to filter materials by their kind") String mtlName) {
+                                              @ToolParam(description = "codeValue, whose enumerations can be fetched by 'codeMaterial', used to filter materials by their kind") String mtlName) {
         MtlStorage[] materials = this.materialStorage(new MtlStoragePageRequest(size)).block();
         log.debug("Tool materialStorage is called: {}", null == materials ? "" : Arrays.toString(materials));
         return materials;
@@ -162,7 +162,7 @@ public class BeamMtlService extends AbstractBeamConstructionService {
                 }));
     }
 
-//    @Tool(description = "kv pairs where keys are codes and values are their descriptions")
+    //    @Tool(description = "kv pairs where keys are codes and values are their descriptions")
     public Map<String, String> codeMaterial() {
         return codeTree(WLMC)
                 .map(BeamCodeType::codeValueList)

@@ -60,6 +60,7 @@ public class ChatController {
 
     @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> dialog(@PathVariable String dialogId, @RequestParam String question) {
+        log.info("Dialog {} asked: {}", dialogId, question);
         ChatMemory chatMemory = chatMemories.computeIfAbsent(dialogId, id -> new InMemoryChatMemory());
         ChatClient chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)

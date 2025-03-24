@@ -1,4 +1,14 @@
 ### 对话
-POST http://localhost:7845/api/chat/dialog/1453?question=梁场的物料现在是什么情况
+POST http://localhost:7845/api/chat/dialog/10213110164-12436-47141-901315-10139106142125625?question=梁场的物料现在是什么情况
+
+### 对话 172
+POST http://172.168.1.244:7845/api/chat/dialog/10213110164?question=五十字描述一下梁场的物料现在是什么情况
 
 
+### 对话 172 你好
+POST http://172.168.1.244:7845/api/chat/dialog/10213110164?question=你好
+
+
+
+### 对话 172 uuid 你好
+POST http://172.16.0.104:7845/api/chat/dialog/1453?question=你好

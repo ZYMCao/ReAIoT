@@ -3,7 +3,6 @@ package cn.easttrans.reaiot.agentic;
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
 import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -19,7 +18,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Arrays;
 
-import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.*;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.PASSWORD_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.SUFFIX_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.USERNAME_ENV;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.concurrent.TimeUnit.MINUTES;
