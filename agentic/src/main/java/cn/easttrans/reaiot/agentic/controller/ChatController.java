@@ -1,5 +1,7 @@
 package cn.easttrans.reaiot.agentic.controller;
 
+import cn.easttrans.reaiot.agentic.domain.chat.Question;
+import cn.easttrans.reaiot.agentic.service.chat.ChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -33,41 +35,17 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @Slf4j
 public class ChatController {
     private final Resource systemPrompt;
-    private final String urlLLM;
-    private final String LLM_CALL_ERROR;
-    private final ChatClient chatClient;
+    private final ChatService chatService;
 
     @Autowired
     public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
-                          @Value(BASE_URL_ENV) String urlLLM,
-                          ChatModel chatModel,
-                          ChatMemory chatMemory) {
+                          ChatService chatService) {
         this.systemPrompt = systemPrompt;
-        this.urlLLM = urlLLM;
-        this.LLM_CALL_ERROR = "Fail to connect to " + urlLLM + "!!";
-        this.chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
-//                .defaultTools(beamMtlService)
-                .build();
-    }
-
-    private record Question(String user) {
+        this.chatService = chatService;
     }
 
     @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> dialog(@PathVariable String dialogId, @RequestBody Question question) {
-        log.info("Dialog {} asked: {}", dialogId, question.user());
-
-        return chatClient.prompt()
-                .user(question.user())
-                .system(systemPrompt)
-                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, dialogId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                .stream()
-                .content()
-                .switchIfEmpty(Mono.fromRunnable(() -> log.warn(LLM_CALL_ERROR)).then(Mono.error(new RuntimeException(LLM_CALL_ERROR))))
-                .doOnNext(log::debug)
-                .map(content -> ServerSentEvent.builder(content).event("message").build())
-                .concatWithValues(ServerSentEvent.builder("[DONE]").build())
-                .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
+        return chatService.dialog(dialogId, question.user());
     }
 }

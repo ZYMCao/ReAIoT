@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.memory.cassandra.CassandraChatMemory;
 import org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -15,6 +16,9 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.cassandra.CassandraVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -54,9 +58,13 @@ public class AgenticApplication {
         SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
+    //    @Bean
+    ChatMemory defaultMemory() {
+        return new InMemoryChatMemory();
+    }
+
     @Bean
-    ChatMemory defaultMemory(CqlSession cqlSession) {
-        // return new InMemoryChatMemory();
+    ChatMemory defaultCassandraMemory(CqlSession cqlSession) {
         return CassandraChatMemory.create(CassandraChatMemoryConfig.builder()
                 // .withTimeToLive(Duration.ofDays(30)) // ToDo: 讨论一下需要保存对话记录多久？
                 .withCqlSession(cqlSession)
@@ -64,7 +72,7 @@ public class AgenticApplication {
     }
 
     @Bean
-    public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
+    public CqlSession cqlSession(@Value("${easttrans.cassandra.contact-point:}") String contactPoint) {
         return new CqlSessionBuilder()
                 .addContactPoint(new InetSocketAddress(contactPoint, 9042))
                 .withLocalDatacenter("datacenter1")

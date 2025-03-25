@@ -27,4 +27,4 @@ easttrans:
     password: "${BEAM_CONSTRUCTION_PASSWORD}"
     suffix: "${BEAM_CONSTRUCTION_SUFFIX:login_njlc}"
   cassandra:
-    contact-point: "${EASTTRANS_CASSANDRA:10.0.0.66}"
+    contact-point: "${EASTTRANS_CASSANDRA:172.16.0.104}" # 10.0.0.66, 10.0.0.68, 172.16.0.104
