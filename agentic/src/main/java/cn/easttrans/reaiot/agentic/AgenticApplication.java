@@ -11,6 +11,8 @@ import org.springframework.ai.chat.memory.cassandra.CassandraChatMemory;
 import org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.transformers.TransformersEmbeddingModel;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.cassandra.CassandraVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -73,6 +75,13 @@ public class AgenticApplication {
     public EmbeddingModel defaultEmbeddingModel() {
         // default is ONNX all-MiniLM-L6-v2 which is what we want
         return new TransformersEmbeddingModel();
+    }
+
+    @Bean
+    public VectorStore defaultVectorStore(CqlSession cqlSession, EmbeddingModel embeddingModel) {
+        return CassandraVectorStore.builder(embeddingModel)
+                .session(cqlSession)
+                .build();
     }
 
     @Bean
