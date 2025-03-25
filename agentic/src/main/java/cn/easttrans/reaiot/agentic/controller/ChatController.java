@@ -13,18 +13,21 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
+import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
 /**
@@ -37,42 +40,35 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @Slf4j
 public class ChatController {
     private final Resource systemPrompt;
-    private final ChatModel chatModel;
     private final String urlLLM;
-    private final Map<String, ChatMemory> chatMemories = new ConcurrentHashMap<>();
-    private final BeamMtlService beamMtlService;
     private final String LLM_CALL_ERROR;
-    private final String beamMaterialInfo;
+    private final ChatClient chatClient;
 
     @Autowired
     public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
                           @Value(BASE_URL_ENV) String urlLLM,
                           ChatModel chatModel,
-                          BeamMtlService beamMtlService) {
+                          ChatMemory chatMemory) {
         this.systemPrompt = systemPrompt;
-        this.chatModel = chatModel;
         this.urlLLM = urlLLM;
-        this.beamMtlService = beamMtlService;
         this.LLM_CALL_ERROR = "Fail to connect to " + urlLLM + "!!";
-
-        beamMaterialInfo = Arrays.toString(beamMtlService.materialStorage(100));
-    }
-
-    @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> dialog(@PathVariable String dialogId, @RequestParam String question) {
-        log.info("Dialog {} asked: {}", dialogId, question);
-        ChatMemory chatMemory = chatMemories.computeIfAbsent(dialogId, id -> new InMemoryChatMemory());
-        ChatClient chatClient = ChatClient.builder(chatModel)
-                .defaultSystem(systemPrompt)
+        this.chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
 //                .defaultTools(beamMtlService)
                 .build();
+    }
 
+    private record Question(String user) {
+    }
 
-        String realQuestion = question + "## 宁盐梁场的最近的物料入库信息: " + beamMaterialInfo + "## 宁盐梁场的最近的物料存量信息: ";
+    @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> dialog(@PathVariable String dialogId, @RequestBody Question question) {
+        log.info("Dialog {} asked: {}", dialogId, question.user());
+
         return chatClient.prompt()
-                .user(realQuestion)
+                .user(question.user())
                 .system(systemPrompt)
+                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, dialogId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
                 .stream()
                 .content()
                 .switchIfEmpty(Mono.fromRunnable(() -> log.warn(LLM_CALL_ERROR)).then(Mono.error(new RuntimeException(LLM_CALL_ERROR))))

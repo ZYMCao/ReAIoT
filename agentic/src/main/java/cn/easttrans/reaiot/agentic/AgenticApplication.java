@@ -1,14 +1,17 @@
 package cn.easttrans.reaiot.agentic;
 
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.LoginRequest;
-import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.ai.tool.method.MethodToolCallbackProvider;
+import org.springframework.ai.chat.memory.cassandra.CassandraChatMemory;
+import org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.transformers.TransformersEmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,6 +19,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Arrays;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
@@ -48,9 +53,32 @@ public class AgenticApplication {
         SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
-    @Bean
+    //    @Bean
     ChatMemory defaultMemory() {
         return new InMemoryChatMemory(); // ToDo: 替换为 org.springframework.ai.chat.memory.CassandraChatMemory 作持久化
+    }
+
+    @Bean
+    public CqlSession cqlSession() {
+        return new CqlSessionBuilder()
+                .addContactPoint(new InetSocketAddress("10.0.0.66", 9042))
+                .addContactPoint(new InetSocketAddress("10.0.0.68", 9042))
+                .withLocalDatacenter("datacenter1")
+                .build();
+    }
+
+    @Bean
+    ChatMemory cassandraMemory(CqlSession cqlSession) {
+        return CassandraChatMemory.create(CassandraChatMemoryConfig.builder()
+                .withTimeToLive(Duration.ofDays(1))
+                .withCqlSession(cqlSession)
+                .build());
+    }
+
+    @Bean
+    public EmbeddingModel defaultEmbeddingModel() {
+        // default is ONNX all-MiniLM-L6-v2 which is what we want
+        return new TransformersEmbeddingModel();
     }
 
     @Bean
@@ -86,10 +114,5 @@ public class AgenticApplication {
                 .defaultHeader("Projectid", "5853") // ToDo: 写死吗??
                 .codecs(configurer -> configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper)))
                 .build();
-    }
-
-    @Bean
-    public ToolCallbackProvider beamMtlServiceTools(BeamMtlService beamMtlService) {
-        return MethodToolCallbackProvider.builder().toolObjects(beamMtlService).build();
     }
 }
