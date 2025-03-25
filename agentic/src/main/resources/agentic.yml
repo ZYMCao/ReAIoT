@@ -26,3 +26,5 @@ easttrans:
     username: "${BEAM_CONSTRUCTION_USERNAME}"
     password: "${BEAM_CONSTRUCTION_PASSWORD}"
     suffix: "${BEAM_CONSTRUCTION_SUFFIX:login_njlc}"
+  cassandra:
+    contact-point: "${EASTTRANS_CASSANDRA:10.0.0.66}"

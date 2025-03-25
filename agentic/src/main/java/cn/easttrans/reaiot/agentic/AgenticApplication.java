@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.memory.cassandra.CassandraChatMemory;
 import org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -20,13 +19,13 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.Arrays;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.PASSWORD_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.SUFFIX_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.USERNAME_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.CASSANDRA_CONTACT_ENV;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -53,26 +52,21 @@ public class AgenticApplication {
         SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
-    //    @Bean
-    ChatMemory defaultMemory() {
-        return new InMemoryChatMemory(); // ToDo: 替换为 org.springframework.ai.chat.memory.CassandraChatMemory 作持久化
-    }
-
     @Bean
-    public CqlSession cqlSession() {
-        return new CqlSessionBuilder()
-                .addContactPoint(new InetSocketAddress("10.0.0.66", 9042))
-                .addContactPoint(new InetSocketAddress("10.0.0.68", 9042))
-                .withLocalDatacenter("datacenter1")
-                .build();
-    }
-
-    @Bean
-    ChatMemory cassandraMemory(CqlSession cqlSession) {
+    ChatMemory defaultMemory(CqlSession cqlSession) {
+        // return new InMemoryChatMemory();
         return CassandraChatMemory.create(CassandraChatMemoryConfig.builder()
-                .withTimeToLive(Duration.ofDays(1))
+                // .withTimeToLive(Duration.ofDays(30)) // ToDo: 讨论一下需要保存对话记录多久？
                 .withCqlSession(cqlSession)
                 .build());
+    }
+
+    @Bean
+    public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
+        return new CqlSessionBuilder()
+                .addContactPoint(new InetSocketAddress(contactPoint, 9042))
+                .withLocalDatacenter("datacenter1")
+                .build();
     }
 
     @Bean
