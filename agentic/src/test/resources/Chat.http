@@ -1,10 +1,24 @@
-### localhost dialog
+### localhost dialog 你好，我是展颖
 POST http://localhost:7845/api/chat/dialog/10213110164-12436-47141-901315-10139106142125626
 Content-Type: application/json
 
 {
-  "user": "你好，我是展颖"
+  "user": "你好，我是展颖",
+  "system": ""
 }
+
+### localhost dialog 你了解宁盐梁场吗？
+POST http://localhost:7845/api/chat/dialog/10213110164-12436-47141-901315-10139106142125626
+Content-Type: application/json
+
+{
+"user": "你了解宁盐梁场吗？"
+}
+
+
+### localhost getMemory
+GET http://localhost:7845/api/chat/getMemory/10213110164-12436-47141-901315-10139106142125626
+
 
 
 ### 172.16.0.104 dialog

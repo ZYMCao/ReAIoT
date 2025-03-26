@@ -26,6 +26,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Map;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.PASSWORD_ENV;
@@ -80,9 +81,15 @@ public class AgenticApplication {
     }
 
     @Bean
-    public EmbeddingModel defaultEmbeddingModel() {
-        // default is ONNX all-MiniLM-L6-v2 which is what we want
-        return new TransformersEmbeddingModel();
+    public EmbeddingModel defaultEmbeddingModel() throws Exception {
+        var embeddingModel = new TransformersEmbeddingModel();
+        embeddingModel.setTokenizerResource("classpath:/onnx/all-MiniLM-L6-v2/tokenizer.json");
+        embeddingModel.setModelResource("classpath:/onnx/all-MiniLM-L6-v2/model.onnx"); // ToDo: Outsource model.onnx
+        embeddingModel.setResourceCacheDirectory("/tmp/onnx-zoo");
+        embeddingModel.setTokenizerOptions(Map.of("padding", "true"));
+
+        embeddingModel.afterPropertiesSet();
+        return embeddingModel;
     }
 
     @Bean
