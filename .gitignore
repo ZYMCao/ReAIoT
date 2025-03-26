@@ -37,3 +37,4 @@ build/
 *.env.json
 
 /agentic/src/main/resources/onnx/all-MiniLM-L6-v2/model.onnx
+DeploymentsOnUbuntu.md
