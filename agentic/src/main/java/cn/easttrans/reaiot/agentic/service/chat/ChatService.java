@@ -12,6 +12,5 @@ public interface ChatService {
 
     Flux<ServerSentEvent<String>> dialog(String conversationId, String systemMsg, String user);
     Flux<ServerSentEvent<String>> dialog(String conversationId, Resource systemMsg, String userMsg);
-
     List<Message> getMemory(String dialogId, int lastN);
 }

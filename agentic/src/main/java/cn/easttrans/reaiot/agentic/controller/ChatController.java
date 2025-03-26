@@ -1,7 +1,7 @@
 package cn.easttrans.reaiot.agentic.controller;
 
 import cn.easttrans.reaiot.agentic.domain.chat.Question;
-import cn.easttrans.reaiot.agentic.service.chat.ChatService;
+import cn.easttrans.reaiot.agentic.service.chat.DefaultChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Set;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
@@ -31,25 +32,36 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 @Slf4j
 public class ChatController {
     private final Resource systemPrompt;
-    private final ChatService chatService;
+    private final DefaultChatService chatService;
 
     @Autowired
     public ChatController(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
-                          ChatService chatService) {
+                          DefaultChatService chatService) {
         this.systemPrompt = systemPrompt;
         this.chatService = chatService;
     }
 
-    @PostMapping(value = "/dialog/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> dialog(@PathVariable String dialogId, @RequestBody Question question) {
+    @PostMapping(value = "/dialog/{userId}/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> dialog(@PathVariable String userId, @PathVariable String dialogId, @RequestBody Question question) {
+        String sessionId = userId + ":" + dialogId;
         return question.system() == null ?
-                chatService.dialog(dialogId, this.systemPrompt, question.user()) :
-                chatService.dialog(dialogId, question.system(), question.user());
-
+                chatService.dialog(sessionId, this.systemPrompt, question.user()) :
+                chatService.dialog(sessionId, question.system(), question.user());
     }
 
-    @GetMapping(value = "/getMemory/{dialogId}")
-    public List<Message> getMemory(@PathVariable String dialogId) {
-        return chatService.getMemory(dialogId, 50);
+    @GetMapping(value = "/getMemory/{userId}/{dialogId}")
+    public List<Message> getMemory(@PathVariable String userId, @PathVariable String dialogId) {
+        String sessionId = userId + ":" + dialogId;
+        return chatService.getMemory(sessionId, 50);
+    }
+
+    @GetMapping(value = "/getConversationName")
+    public String getConversationName(@RequestBody Question question) {
+        return chatService.getConversationName(question.user());
+    }
+
+    @GetMapping(value = "/getSessions/{userId}")
+    public Set<String> getUserSessions(@PathVariable String userId) {
+        return chatService.getUserSessions(userId);
     }
 }

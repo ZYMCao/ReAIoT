@@ -22,6 +22,7 @@ public final class EnvironmentalConstants {
     public static class OPEN_AI {
         public static final String BASE_URL_ENV = "${spring.ai.openai.base-url}";
         public static final String SYS_PROMPT_ENV = "classpath:/prompts/system-message.st";
+        public static final String NOMEN_PROMPT_ENV = "classpath:/prompts/system-name-creator.st";
 
     }
 }

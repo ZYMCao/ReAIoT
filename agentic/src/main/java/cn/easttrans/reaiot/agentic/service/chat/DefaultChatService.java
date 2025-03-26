@@ -1,5 +1,8 @@
 package cn.easttrans.reaiot.agentic.service.chat;
 
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -14,10 +17,14 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.NOMEN_PROMPT_ENV;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
 
@@ -25,16 +32,22 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 @Slf4j
 public class DefaultChatService implements ChatService {
     private final String urlLLM;
+    private final Resource nameCreatorPrompt;
     private final ChatMemory chatMemory;
     private final ChatClient chatClient;
+    private final CqlSession cqlSession;
 
     @Autowired
     public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
+                              @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
                               ChatMemory chatMemory,
-                              ChatModel chatModel) {
+                              ChatModel chatModel,
+                              CqlSession cqlSession) {
         this.urlLLM = urlLLM;
+        this.nameCreatorPrompt = nameCreatorPrompt;
         this.chatMemory = chatMemory;
         this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory)).build();
+        this.cqlSession = cqlSession;
     }
 
     @Override
@@ -78,5 +91,42 @@ public class DefaultChatService implements ChatService {
     @Override
     public List<Message> getMemory(String dialogId, int lastN) {
         return this.chatMemory.get(dialogId, lastN);
+    }
+
+    public String getConversationName(String userMsg) {
+        if (userMsg.isEmpty()) {
+            return "";
+        } else {
+            return chatClient.prompt()
+                    .system(this.nameCreatorPrompt)
+                    .user(userMsg)
+                    .call()
+                    .content();
+        }
+    }
+
+    public Map<String, List<Message>> getAllUserMemories(String userId) {
+        Map<String, List<Message>> result = new HashMap<>();
+        Set<String> sessions = getUserSessions(userId);
+
+        for (String sessionId : sessions) {
+            result.put(sessionId, chatMemory.get(sessionId, 50));
+        }
+        return result;
+    }
+
+    public Set<String> getUserSessions(String userId) {
+        PreparedStatement stmt = this.cqlSession.prepare(
+                "SELECT DISTINCT session_id " +
+                        "FROM springframework.ai_chat_memory " + // ToDo: 不能写死
+                        "WHERE session_id LIKE ? " +
+                        "PER PARTITION LIMIT 1000"
+        );
+
+        ResultSet rs = this.cqlSession.execute(stmt.bind(userId + ":%"));
+
+        Set<String> sessionIds = new HashSet<>();
+        rs.forEach(row -> sessionIds.add(row.getString("session_id")));
+        return sessionIds;
     }
 }
