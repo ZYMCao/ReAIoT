@@ -16,11 +16,11 @@ Content-Type: application/json
 }
 
 
-### localhost getMemory
+### localhost getMemory 获取对话的具体交互内容
 GET http://localhost:7845/api/chat/getMemory/1453/10213110164-12436-47141-901315-10139106142125626
 
 
-### getSessions by userId
+### getSessions by userId 获取用户的对话
 GET http://localhost:7845/api/chat/getSessions/1453
 
 

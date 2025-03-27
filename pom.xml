@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.easttrans</groupId>
     <artifactId>reaiot</artifactId>
-    <version>0.1.Beam</version>
+    <version>0.2.Cassandra</version>
     <packaging>pom</packaging>
     <name>ReAIoT</name>
     <description>响应式人工智能物联网系统</description>

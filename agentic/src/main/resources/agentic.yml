@@ -19,7 +19,6 @@ spring:
         options:
           model: "${DEEPSEEK_MODEL:deepseek-chat}" # deepseek-chat 或 deepseek-reasoner 或 deepseek-ai/DeepSeek-V3 或 deepseek-ai/DeepSeek-R1
           temperature: 0.6
-
 easttrans:
   # 梁场
   beam-construction:
@@ -28,4 +27,5 @@ easttrans:
     password: "${BEAM_CONSTRUCTION_PASSWORD}"
     suffix: "${BEAM_CONSTRUCTION_SUFFIX:login_njlc}"
   cassandra:
-    contact-point: "${EASTTRANS_CASSANDRA:172.16.0.104}" # 10.0.0.66, 10.0.0.68, 172.16.0.104
+    contact-point: "${EASTTRANS_CASSANDRA:172.16.0.106}" # 10.0.0.66, 10.0.0.68, 172.16.0.104
+    key-space: "${CASSANDRA_KEY_SPACE:reaiot_5853}"

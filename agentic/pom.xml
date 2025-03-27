@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.easttrans</groupId>
         <artifactId>reaiot</artifactId>
-        <version>0.1.Beam</version>
+        <version>0.2.Cassandra</version>
     </parent>
 
     <groupId>cn.easttrans.reaiot</groupId>

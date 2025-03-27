@@ -23,16 +23,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.KEY_SPACE_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.NOMEN_PROMPT_ENV;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
+import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_KEYSPACE_NAME;
+import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_TABLE_NAME;
 
 @Service
 @Slf4j
 public class DefaultChatService implements ChatService {
     private final String urlLLM;
     private final Resource nameCreatorPrompt;
+    private final String keySpace;
     private final ChatMemory chatMemory;
     private final ChatClient chatClient;
     private final CqlSession cqlSession;
@@ -41,12 +45,14 @@ public class DefaultChatService implements ChatService {
     @Autowired
     public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
                               @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
+                              @Value(KEY_SPACE_ENV) String keySpace,
                               ChatMemory chatMemory,
                               ChatModel chatModel,
                               CqlSession cqlSession,
                               @Qualifier("userSessionsCache") Cache<String, Set<String>> cache) {
         this.urlLLM = urlLLM;
         this.nameCreatorPrompt = nameCreatorPrompt;
+        this.keySpace = keySpace;
         this.chatMemory = chatMemory;
         this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory)).build();
         this.cqlSession = cqlSession;
@@ -109,10 +115,12 @@ public class DefaultChatService implements ChatService {
     }
 
     public Set<String> getUserSessions(String userId) { // ToDo: do it reactively
-        return cache.get(userId, key -> {
-            PreparedStatement stmt = this.cqlSession.prepare(
-                    "SELECT DISTINCT session_id FROM springframework.ai_chat_memory" // ToDo: 不能写死
-            );
+        Set<String> cachedSessions = cache.getIfPresent(userId);
+        if (cachedSessions != null) {
+            return cachedSessions;
+        } else {
+            PreparedStatement stmt = cqlSession.prepare("SELECT DISTINCT session_id FROM " + DEFAULT_KEYSPACE_NAME + "." + DEFAULT_TABLE_NAME);
+
             ResultSet rs = this.cqlSession.execute(stmt.bind());
             Set<String> sessionIds = new HashSet<>();
             rs.forEach(row -> {
@@ -120,11 +128,12 @@ public class DefaultChatService implements ChatService {
                 if (null != sessionId) {
                     String[] parts = sessionId.split(":", 2);
                     if (parts.length > 0 && parts[0].equals(userId)) {
-                        sessionIds.add(sessionId);
+                        sessionIds.add(parts[1]);
                     }
                 }
             });
+
             return sessionIds;
-        });
+        }
     }
 }

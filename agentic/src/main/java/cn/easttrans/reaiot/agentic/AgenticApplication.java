@@ -22,6 +22,7 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,8 @@ import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.BASE_URL_E
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.PASSWORD_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.SUFFIX_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.USERNAME_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.CASSANDRA_CONTACT_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.KEY_SPACE_ENV;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -61,16 +64,19 @@ public class AgenticApplication {
         return new InMemoryChatMemory();
     }
 
+
     @Bean
-    ChatMemory defaultCassandraMemory(CqlSession cqlSession) {
+    ChatMemory defaultCassandraMemory(CqlSession cqlSession, @Value(KEY_SPACE_ENV) String keySpace) {
         return CassandraChatMemory.create(CassandraChatMemoryConfig.builder()
-                // .withTimeToLive(Duration.ofDays(30)) // ToDo: 讨论一下需要保存对话记录多久？
+//                .withKeyspaceName(keySpace)
+                .withTableName(CassandraChatMemoryConfig.DEFAULT_TABLE_NAME)
+                .withTimeToLive(Duration.ofDays(30)) // ToDo: 讨论一下需要保存对话记录多久？
                 .withCqlSession(cqlSession)
                 .build());
     }
 
     @Bean
-    public CqlSession cqlSession(@Value("${easttrans.cassandra.contact-point:}") String contactPoint) {
+    public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
         return new CqlSessionBuilder()
                 .addContactPoint(new InetSocketAddress(contactPoint, 9042))
                 .withLocalDatacenter("datacenter1")
@@ -90,9 +96,11 @@ public class AgenticApplication {
     }
 
     @Bean
-    public VectorStore defaultVectorStore(CqlSession cqlSession, EmbeddingModel embeddingModel) {
+    public VectorStore defaultVectorStore(CqlSession cqlSession, EmbeddingModel embeddingModel, @Value(KEY_SPACE_ENV) String keySpace) {
         return CassandraVectorStore.builder(embeddingModel)
                 .session(cqlSession)
+//                .keyspace(keySpace)
+                .table(CassandraVectorStore.DEFAULT_TABLE_NAME)
                 .build();
     }
 

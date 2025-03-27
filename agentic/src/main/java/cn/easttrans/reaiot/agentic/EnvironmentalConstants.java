@@ -5,6 +5,7 @@ package cn.easttrans.reaiot.agentic;
  */
 public final class EnvironmentalConstants {
     public static final String CASSANDRA_CONTACT_ENV = "${easttrans.cassandra.contact-point}";
+    public static final String KEY_SPACE_ENV = "${easttrans.cassandra.key-space}";
 
     /**
      * 梁场
