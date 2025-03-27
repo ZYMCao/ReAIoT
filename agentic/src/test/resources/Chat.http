@@ -20,15 +20,19 @@ Content-Type: application/json
 GET http://localhost:7845/api/chat/getMemory/1453/10213110164-12436-47141-901315-10139106142125626
 
 
+### getSessions by userId
+GET http://localhost:7845/api/chat/getSessions/1453
+
+
+
+
+
+
+
 ### 172.16.0.104 dialog
 POST http://172.16.0.104:7845/api/chat/dialog/1453/201511108140-9109-49012-1014101-411412121213713126
 Content-Type: application/json
 
-
 {
   "user": "你好，我是展颖"
 }
-
-### getSessions by userId
-GET http://localhost:7845/api/chat/getSessions/1453
-

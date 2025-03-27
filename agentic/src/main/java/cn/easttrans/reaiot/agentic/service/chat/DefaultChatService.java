@@ -3,6 +3,7 @@ package cn.easttrans.reaiot.agentic.service.chat;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -10,6 +11,7 @@ import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.ServerSentEvent;
@@ -17,10 +19,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
@@ -36,18 +36,21 @@ public class DefaultChatService implements ChatService {
     private final ChatMemory chatMemory;
     private final ChatClient chatClient;
     private final CqlSession cqlSession;
+    private final Cache<String, Set<String>> cache;
 
     @Autowired
     public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
                               @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
                               ChatMemory chatMemory,
                               ChatModel chatModel,
-                              CqlSession cqlSession) {
+                              CqlSession cqlSession,
+                              @Qualifier("userSessionsCache") Cache<String, Set<String>> cache) {
         this.urlLLM = urlLLM;
         this.nameCreatorPrompt = nameCreatorPrompt;
         this.chatMemory = chatMemory;
         this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory)).build();
         this.cqlSession = cqlSession;
+        this.cache = cache;
     }
 
     @Override
@@ -89,8 +92,8 @@ public class DefaultChatService implements ChatService {
     }
 
     @Override
-    public List<Message> getMemory(String dialogId, int lastN) {
-        return this.chatMemory.get(dialogId, lastN);
+    public List<Message> getMemory(String sessionId, int lastN) {
+        return this.chatMemory.get(sessionId, lastN);
     }
 
     public String getConversationName(String userMsg) {
@@ -105,28 +108,23 @@ public class DefaultChatService implements ChatService {
         }
     }
 
-    public Map<String, List<Message>> getAllUserMemories(String userId) {
-        Map<String, List<Message>> result = new HashMap<>();
-        Set<String> sessions = getUserSessions(userId);
-
-        for (String sessionId : sessions) {
-            result.put(sessionId, chatMemory.get(sessionId, 50));
-        }
-        return result;
-    }
-
-    public Set<String> getUserSessions(String userId) {
-        PreparedStatement stmt = this.cqlSession.prepare(
-                "SELECT DISTINCT session_id " +
-                        "FROM springframework.ai_chat_memory " + // ToDo: 不能写死
-                        "WHERE session_id LIKE ? " +
-                        "PER PARTITION LIMIT 1000"
-        );
-
-        ResultSet rs = this.cqlSession.execute(stmt.bind(userId + ":%"));
-
-        Set<String> sessionIds = new HashSet<>();
-        rs.forEach(row -> sessionIds.add(row.getString("session_id")));
-        return sessionIds;
+    public Set<String> getUserSessions(String userId) { // ToDo: do it reactively
+        return cache.get(userId, key -> {
+            PreparedStatement stmt = this.cqlSession.prepare(
+                    "SELECT DISTINCT session_id FROM springframework.ai_chat_memory" // ToDo: 不能写死
+            );
+            ResultSet rs = this.cqlSession.execute(stmt.bind());
+            Set<String> sessionIds = new HashSet<>();
+            rs.forEach(row -> {
+                String sessionId = row.getString("session_id");
+                if (null != sessionId) {
+                    String[] parts = sessionId.split(":", 2);
+                    if (parts.length > 0 && parts[0].equals(userId)) {
+                        sessionIds.add(sessionId);
+                    }
+                }
+            });
+            return sessionIds;
+        });
     }
 }
