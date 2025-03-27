@@ -1,5 +1,6 @@
 package cn.easttrans.reaiot.agentic.service.chat;
 
+import cn.easttrans.reaiot.agentic.domain.exception.TrivialResponseError;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
@@ -19,8 +20,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.KEY_SPACE_ENV;
@@ -86,15 +90,44 @@ public class DefaultChatService implements ChatService {
     }
 
     private Flux<ServerSentEvent<String>> getServerSentEventFlux(String conversationId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
+        String[] parts = conversationId.split(":", 2);
+        if (parts.length != 2) {
+            return Flux.error(new IllegalArgumentException("Invalid conversationId format: " + conversationId));
+        }
+        String userId = parts[0];
+        String sessionId = parts[1];
+
         return chatClientRequestSpec
                 .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
                 .stream()
                 .content()
-                .switchIfEmpty(Mono.fromRunnable(() -> log.warn(llmCallError)).then(Mono.error(new RuntimeException(llmCallError))))
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Empty response from LLM - {}", llmCallError);
+                    return Mono.error(new TrivialResponseError(llmCallError));
+                }))
                 .doOnNext(log::debug)
                 .map(content -> ServerSentEvent.builder(content).event("message").build())
                 .concatWithValues(ServerSentEvent.builder("[DONE]").build())
-                .onErrorResume(e -> Flux.just(ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build()));
+                .doOnComplete(() -> {
+                    cache.asMap().compute(userId, (key, existingSessions) -> {
+                        Set<String> updatedSessions = existingSessions != null ?
+                                new HashSet<>(existingSessions) : new HashSet<>();
+                        updatedSessions.add(sessionId);
+                        return updatedSessions;
+                    });
+                    log.debug("Updated cache for userId={} with sessionId={}", userId, sessionId);
+                })
+                .onErrorResume(e -> {
+                    log.error("Error while processing LLM stream", e);
+                    return Flux.just(
+                            ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build(),
+                            ServerSentEvent.builder("[DONE]").build()
+                    );
+                });
+    }
+
+    public void clearMemory(String sessionId) {
+        this.chatMemory.clear(sessionId);
     }
 
     @Override
@@ -103,7 +136,7 @@ public class DefaultChatService implements ChatService {
     }
 
     public String getConversationName(String userMsg) {
-        if (userMsg.isEmpty()) {
+        if (null == userMsg || userMsg.isEmpty()) {
             return "";
         } else {
             return chatClient.prompt()
@@ -117,23 +150,29 @@ public class DefaultChatService implements ChatService {
     public Set<String> getUserSessions(String userId) { // ToDo: do it reactively
         Set<String> cachedSessions = cache.getIfPresent(userId);
         if (cachedSessions != null) {
+            log.trace("Current cache state: {}", cache.asMap());
             return cachedSessions;
         } else {
             PreparedStatement stmt = cqlSession.prepare("SELECT DISTINCT session_id FROM " + DEFAULT_KEYSPACE_NAME + "." + DEFAULT_TABLE_NAME);
 
             ResultSet rs = this.cqlSession.execute(stmt.bind());
-            Set<String> sessionIds = new HashSet<>();
+
+            Map<String, Set<String>> sessionsByUser = new HashMap<>();
             rs.forEach(row -> {
                 String sessionId = row.getString("session_id");
                 if (null != sessionId) {
                     String[] parts = sessionId.split(":", 2);
-                    if (parts.length > 0 && parts[0].equals(userId)) {
-                        sessionIds.add(parts[1]);
+                    if (parts.length == 2) {
+                        sessionsByUser
+                                .computeIfAbsent(parts[0], k -> new HashSet<>())
+                                .add(parts[1]);
                     }
+
                 }
             });
-
-            return sessionIds;
+            sessionsByUser.forEach(cache::put);
+            log.trace("Current cache state: {}", cache.asMap());
+            return sessionsByUser.getOrDefault(userId, Collections.emptySet());
         }
     }
 }

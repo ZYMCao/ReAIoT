@@ -24,7 +24,5 @@
         <appender-ref ref="fileLogAppender"/>
     </root>
 
-    <!-- Special configuration for Spring Boot -->
-    <!--    <logger name="org.springframework" level="WARN"/>-->
-    <!--    <logger name="cn.easttrans.reaiot" level="WARN"/>-->
+    <!--    <logger name="cn.easttrans.reaiot" level="DEBUG"/>-->
 </configuration>

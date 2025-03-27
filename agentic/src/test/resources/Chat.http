@@ -1,5 +1,5 @@
 ### localhost dialog 你好，我是展颖
-POST http://localhost:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125626
+POST http://localhost:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125628
 Content-Type: application/json
 
 {
@@ -8,31 +8,44 @@ Content-Type: application/json
 }
 
 ### localhost dialog 你了解宁盐梁场吗？
-POST http://localhost:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125626
+POST http://localhost:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125627
 Content-Type: application/json
 
 {
-"user": "你了解宁盐梁场吗？"
+  "user": "你了解宁盐梁场吗？"
 }
 
+### localhost dialog 再具体一点呢？
+POST http://localhost:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125627
+Content-Type: application/json
+
+{
+  "user": "再具体一点呢？"
+}
 
 ### localhost getMemory 获取对话的具体交互内容
 GET http://localhost:7845/api/chat/getMemory/1453/10213110164-12436-47141-901315-10139106142125626
 
 
 ### getSessions by userId 获取用户的对话
-GET http://localhost:7845/api/chat/getSessions/1453
+GET http://localhost:7845/api/chat/getSessions/717258
 
 
 
 
 
-
-
-### 172.16.0.104 dialog
-POST http://172.16.0.104:7845/api/chat/dialog/1453/201511108140-9109-49012-1014101-411412121213713126
+### localhost dialog 你好，我是展颖
+POST http://172.16.0.106:7845/api/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125626
 Content-Type: application/json
 
 {
-  "user": "你好，我是展颖"
+  "user": "你好，我是展颖",
+  "context": "nyBeamField/materialInventory"
 }
+
+### localhost getMemory 获取对话的具体交互内容
+GET http://172.16.0.106:7845/api/chat/getMemory/1453/10213110164-12436-47141-901315-10139106142125626
+
+
+### 172.16.0.106 getSessions by userId 获取用户的对话
+GET http://172.16.0.106:7845/api/chat/getSessions/1453

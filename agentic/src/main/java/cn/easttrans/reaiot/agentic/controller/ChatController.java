@@ -52,7 +52,7 @@ public class ChatController {
     @GetMapping(value = "/getMemory/{userId}/{dialogId}")
     public List<Message> getMemory(@PathVariable String userId, @PathVariable String dialogId) {
         String sessionId = userId + ":" + dialogId;
-        return chatService.getMemory(sessionId, 50);
+        return chatService.getMemory(sessionId, 200);
     }
 
     @GetMapping(value = "/getConversationName")
