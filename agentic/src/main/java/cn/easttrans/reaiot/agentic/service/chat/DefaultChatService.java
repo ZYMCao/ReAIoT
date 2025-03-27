@@ -61,11 +61,34 @@ public class DefaultChatService implements ChatService {
         this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory)).build();
         this.cqlSession = cqlSession;
         this.cache = cache;
+
+//        this.initializeTable();
     }
 
-    @Override
-    public Flux<ServerSentEvent<String>> dialog(String conversationId, String systemMsg, String userMsg) {
-        String llmCallError = "Fail to connect to " + urlLLM + "!!";
+    private static final String USER_SESSION_TABLE_NAME = "ai_chat_user";
+
+    private void initializeTable() {
+        try {
+            boolean tableExists = cqlSession.execute(
+                    String.format("SELECT table_name FROM system_schema.tables WHERE keyspace_name = '%s' AND table_name = '" + USER_SESSION_TABLE_NAME + "';", keySpace)
+            ).one() != null;
+            if (!tableExists) {
+                log.warn("Table {} was not found, creating it ...", USER_SESSION_TABLE_NAME);
+                cqlSession.execute(String.format(
+                        "CREATE TABLE %s.ai_chat_user (" +
+                                "   user_id text," +
+                                "   session_id text," +
+                                "   PRIMARY KEY (user_id, session_id)" +
+                                ") WITH CLUSTERING ORDER BY (session_id DESC);",
+                        keySpace));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize ai_chat_user table", e);
+        }
+    }
+
+    public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, String systemMsg, String userMsg) {
+        String conversationId = userId + ":" + dialogId;
         log.info("Dialog {} asked: {}", conversationId, userMsg);
         ChatClient.ChatClientRequestSpec chatClientRequestSpec = chatClient.prompt();
         if (!systemMsg.isEmpty()) {
@@ -75,18 +98,17 @@ public class DefaultChatService implements ChatService {
             chatClientRequestSpec.user(userMsg);
         }
 
-        return getServerSentEventFlux(conversationId, llmCallError, chatClientRequestSpec);
+        return getServerSentEventFlux(conversationId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
     }
 
-    @Override
-    public Flux<ServerSentEvent<String>> dialog(String conversationId, Resource systemMsg, String userMsg) {
-        String llmCallError = "Fail to connect to " + urlLLM + "!!";
+    public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, Resource systemMsg, String userMsg) {
+        String conversationId = userId + ":" + dialogId;
         log.info("Dialog {} asked: {}", conversationId, userMsg);
         ChatClient.ChatClientRequestSpec chatClientRequestSpec = userMsg.isEmpty() ?
                 chatClient.prompt().system(systemMsg) :
                 chatClient.prompt().system(systemMsg).user(userMsg);
 
-        return getServerSentEventFlux(conversationId, llmCallError, chatClientRequestSpec);
+        return getServerSentEventFlux(conversationId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
     }
 
     private Flux<ServerSentEvent<String>> getServerSentEventFlux(String conversationId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
@@ -130,8 +152,8 @@ public class DefaultChatService implements ChatService {
         this.chatMemory.clear(sessionId);
     }
 
-    @Override
-    public List<Message> getMemory(String sessionId, int lastN) {
+    public List<Message> getMemory(String userId, String dialogId, int lastN) {
+        String sessionId = userId + ":" + dialogId;
         return this.chatMemory.get(sessionId, lastN);
     }
 

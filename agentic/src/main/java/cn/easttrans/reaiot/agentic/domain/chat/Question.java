@@ -4,5 +4,6 @@ import java.io.Serializable;
 
 public record Question(
         String user,
-        String system) implements Serializable {
+        String system,
+        String context) implements Serializable {
 }

@@ -6,14 +6,8 @@ import com.datastax.oss.driver.api.core.CqlSessionBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.InMemoryChatMemory;
-import org.springframework.ai.chat.memory.cassandra.CassandraChatMemory;
-import org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.transformers.TransformersEmbeddingModel;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.cassandra.CassandraVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,7 +16,6 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +25,6 @@ import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.PASSWORD_E
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.SUFFIX_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.BEAM.USERNAME_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.CASSANDRA_CONTACT_ENV;
-import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.KEY_SPACE_ENV;
 import static com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -59,22 +51,6 @@ public class AgenticApplication {
         SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
-    //    @Bean
-    ChatMemory defaultMemory() {
-        return new InMemoryChatMemory();
-    }
-
-
-    @Bean
-    ChatMemory defaultCassandraMemory(CqlSession cqlSession, @Value(KEY_SPACE_ENV) String keySpace) {
-        return CassandraChatMemory.create(CassandraChatMemoryConfig.builder()
-//                .withKeyspaceName(keySpace)
-                .withTableName(CassandraChatMemoryConfig.DEFAULT_TABLE_NAME)
-                .withTimeToLive(Duration.ofDays(30)) // ToDo: 讨论一下需要保存对话记录多久？
-                .withCqlSession(cqlSession)
-                .build());
-    }
-
     @Bean
     public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
         return new CqlSessionBuilder()
@@ -93,15 +69,6 @@ public class AgenticApplication {
 
         embeddingModel.afterPropertiesSet();
         return embeddingModel;
-    }
-
-    @Bean
-    public VectorStore defaultVectorStore(CqlSession cqlSession, EmbeddingModel embeddingModel, @Value(KEY_SPACE_ENV) String keySpace) {
-        return CassandraVectorStore.builder(embeddingModel)
-                .session(cqlSession)
-//                .keyspace(keySpace)
-                .table(CassandraVectorStore.DEFAULT_TABLE_NAME)
-                .build();
     }
 
     @Bean

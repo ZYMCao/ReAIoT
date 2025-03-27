@@ -27,7 +27,7 @@ import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
  * @Author: ZhanyingCao
  * @CreateDate: 2025/3/19 14:10
  **/
-@RequestMapping("/api/chat")
+@RequestMapping("/ai/chat")
 @RestController
 @Slf4j
 public class ChatController {
@@ -43,16 +43,14 @@ public class ChatController {
 
     @PostMapping(value = "/dialog/{userId}/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> dialog(@PathVariable String userId, @PathVariable String dialogId, @RequestBody Question question) {
-        String sessionId = userId + ":" + dialogId;
         return question.system() == null ?
-                chatService.dialog(sessionId, this.systemPrompt, question.user()) :
-                chatService.dialog(sessionId, question.system(), question.user());
+                chatService.dialog(userId, dialogId, this.systemPrompt, question.user()) :
+                chatService.dialog(userId, dialogId, question.system(), question.user());
     }
 
     @GetMapping(value = "/getMemory/{userId}/{dialogId}")
     public List<Message> getMemory(@PathVariable String userId, @PathVariable String dialogId) {
-        String sessionId = userId + ":" + dialogId;
-        return chatService.getMemory(sessionId, 200);
+        return chatService.getMemory(userId, dialogId, 200);
     }
 
     @GetMapping(value = "/getConversationName")
