@@ -4,7 +4,7 @@ package cn.easttrans.reaiot.agentic;
  * 环境常量
  */
 public final class EnvironmentalConstants {
-    public static final String CASSANDRA_CONTACT_ENV = "${spring.cassandra.contact-point}";
+    public static final String CASSANDRA_CONTACT_ENV = "${spring.cassandra.contact-points}";
     public static final String KEY_SPACE_ENV = "${spring.ai.vectorstore.cassandra.keyspace}";
 
     /**

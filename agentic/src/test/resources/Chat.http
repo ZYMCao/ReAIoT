@@ -39,7 +39,16 @@ POST http://172.16.0.106:7845/ai/chat/dialog/1453/10213110164-12436-47141-901315
 Content-Type: application/json
 
 {
-  "user": "你好，我是展颖",
+  "user": "hello, I am zhanying",
+  "context": "nyBeamField/materialInventory"
+}
+
+### localhost dialog 你好，我是展颖
+POST http://172.16.0.106:7845/ai/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125626
+Content-Type: application/json
+
+{
+  "user": "Materials stock and loading of 宁盐梁场",
   "context": "nyBeamField/materialInventory"
 }
 
@@ -58,4 +67,20 @@ Content-Type: application/json
 {
   "user": "你好，我是涛",
   "system": ""
+}
+
+### 提供一下宁盐梁场的库存入库的信息
+POST http://172.16.0.106:7845/ai/chat/dialog/1453/40213110164-12436-47140-901315-10139106142215628
+Content-Type: application/json
+
+{
+  "user": "提供一下宁盐梁场的库存入库的信息"
+}
+
+### 宁盐梁场最新的物料入库的现状？
+POST http://172.16.0.106:7845/ai/chat/dialog/1453/40213110164-12436-47104-901315-10139106142215628
+Content-Type: application/json
+
+{
+  "user": "宁盐梁场最新的物料入库的现状？"
 }

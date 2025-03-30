@@ -1,6 +1,8 @@
 package cn.easttrans.reaiot.agentic.service.chat;
 
 import cn.easttrans.reaiot.agentic.domain.exception.TrivialResponseError;
+import cn.easttrans.reaiot.agentic.service.beamconstruction.AbstractBeamConstructionService;
+import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
@@ -45,11 +47,13 @@ public class DefaultChatService implements ChatService {
     private final ChatClient chatClient;
     private final CqlSession cqlSession;
     private final Cache<String, Set<String>> cache;
+    private final BeamMtlService beamMtlService;
 
     @Autowired
     public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
                               @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
                               @Value(KEY_SPACE_ENV) String keySpace,
+                              BeamMtlService beamMtlService,
                               ChatMemory chatMemory,
                               ChatModel chatModel,
                               CqlSession cqlSession,
@@ -58,7 +62,11 @@ public class DefaultChatService implements ChatService {
         this.nameCreatorPrompt = nameCreatorPrompt;
         this.keySpace = keySpace;
         this.chatMemory = chatMemory;
-        this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory)).build();
+        this.beamMtlService = beamMtlService;
+        this.chatClient = ChatClient.builder(chatModel)
+                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory))
+                .defaultTools(beamMtlService)
+                .build();
         this.cqlSession = cqlSession;
         this.cache = cache;
 
