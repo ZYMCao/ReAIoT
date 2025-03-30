@@ -8,19 +8,19 @@ Content-Type: application/json
 }
 
 ### localhost dialog 你了解宁盐梁场吗？
-POST http://localhost:7845/ai/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125627
+POST http://localhost:7845/ai/chat/dialog/1453/12013110174-12436-47141-901315-10139106142125627
 Content-Type: application/json
 
 {
   "user": "你了解宁盐梁场吗？"
 }
 
-### localhost dialog 再具体一点呢？
-POST http://localhost:7845/ai/chat/dialog/1453/10213110164-12436-47141-901315-10139106142125627
+### localhost dialog 提供一些物料入库的信息
+POST http://localhost:7845/ai/chat/dialog/1453/12013110174-12436-47141-901315-10139106142125627
 Content-Type: application/json
 
 {
-  "user": "再具体一点呢？"
+  "user": "提供一些物料入库的信息"
 }
 
 ### localhost getMemory 获取对话的具体交互内容
@@ -78,7 +78,7 @@ Content-Type: application/json
 }
 
 ### 宁盐梁场最新的物料入库的现状？
-POST http://172.16.0.106:7845/ai/chat/dialog/1453/40213110164-12436-47104-901315-10139106142215628
+POST http://172.16.0.106:7845/ai/chat/dialog/1453/40213110174-12436-47104-901315-10139106142215628
 Content-Type: application/json
 
 {
