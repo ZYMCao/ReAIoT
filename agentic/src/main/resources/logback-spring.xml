@@ -25,4 +25,5 @@
     </root>
 
     <logger name="cn.easttrans.reaiot" level="DEBUG"/>
+    <logger name="org.springframework.ai.chat.client.advisor" level="DEBUG"/>
 </configuration>

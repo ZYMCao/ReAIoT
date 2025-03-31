@@ -35,8 +35,9 @@ spring:
         initialize-schema: true
   cassandra:
     cluster-name: ReAIoT
-    #    keyspace-name: "${CASSANDRA_KEY_SPACE:reaiot_5853}"
-    contact-points: "${EASTTRANS_CASSANDRA:10.0.0.66:9042,10.0.0.68:9042}" # 10.0.0.66, 10.0.0.68, 172.16.0.104, 172.16.0.106
+    keyspace-name: "${CASSANDRA_KEY_SPACE:reaiot_5853}"
+    contact-points: "${EASTTRANS_CASSANDRA:172.16.0.104:9042}" # 10.0.0.66, 10.0.0.68, 172.16.0.104, 172.16.0.106
     username: "${CASSANDRA_USERNAME:cassandra}"
     password: "${CASSANDRA_PASSWORD:cassandra}"
-    local-datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS # tables will be created, but not keyspace

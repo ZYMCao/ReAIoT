@@ -43,16 +43,19 @@ public class ChatController {
 
     @PostMapping(value = "/dialog/{userId}/{sessionId}", produces = TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<String>> dialog(@PathVariable String userId, @PathVariable String sessionId, @RequestBody Question question) {
+        if (null == question || question.user().isEmpty() || question.user().isBlank()) {
+            throw new IllegalArgumentException("用户的提问(字段user)不能为空！");
+        }
         return chatService.dialog(userId, sessionId, question.system(), question.user());
     }
 
-//    @GetMapping(value = "/getMemory/{userId}/{sessionId}")
-//    public List<Message> getMemory(@PathVariable String userId, @PathVariable String sessionId) {
-//        return chatService.getMemory(userId, sessionId, 200);
-//    }
+    @GetMapping(value = "/getMemory/{userId}/{sessionId}")
+    public List<Message> getMemory(@PathVariable String userId, @PathVariable String sessionId) {
+        return chatService.getMemory(sessionId, 200);
+    }
 
     @GetMapping(value = "/getSessions/{userId}")
-    public Set<String> getSessions(@PathVariable String userId) {
+    public Flux<String> getSessions(@PathVariable String userId) {
         return chatService.getUserSessions(userId);
     }
 }
