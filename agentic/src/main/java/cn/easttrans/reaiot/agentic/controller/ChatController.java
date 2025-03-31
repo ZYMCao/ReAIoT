@@ -41,25 +41,18 @@ public class ChatController {
         this.chatService = chatService;
     }
 
-    @PostMapping(value = "/dialog/{userId}/{dialogId}", produces = TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<String>> dialog(@PathVariable String userId, @PathVariable String dialogId, @RequestBody Question question) {
-        return question.system() == null ?
-                chatService.dialog(userId, dialogId, this.systemPrompt, question.user()) :
-                chatService.dialog(userId, dialogId, question.system(), question.user());
+    @PostMapping(value = "/dialog/{userId}/{sessionId}", produces = TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> dialog(@PathVariable String userId, @PathVariable String sessionId, @RequestBody Question question) {
+        return chatService.dialog(userId, sessionId, question.system(), question.user());
     }
 
-    @GetMapping(value = "/getMemory/{userId}/{dialogId}")
-    public List<Message> getMemory(@PathVariable String userId, @PathVariable String dialogId) {
-        return chatService.getMemory(userId, dialogId, 200);
-    }
-
-    @GetMapping(value = "/getConversationName")
-    public String getConversationName(@RequestBody Question question) {
-        return chatService.getConversationName(question.user());
+    @GetMapping(value = "/getMemory/{userId}/{sessionId}")
+    public List<Message> getMemory(@PathVariable String userId, @PathVariable String sessionId) {
+        return chatService.getMemory(userId, sessionId, 200);
     }
 
     @GetMapping(value = "/getSessions/{userId}")
-    public Set<String> getUserSessions(@PathVariable String userId) {
+    public Set<String> getSessions(@PathVariable String userId) {
         return chatService.getUserSessions(userId);
     }
 }

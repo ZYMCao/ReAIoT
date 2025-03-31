@@ -6,16 +6,7 @@ package cn.easttrans.reaiot.agentic;
 public final class EnvironmentalConstants {
     public static final String CASSANDRA_CONTACT_ENV = "${spring.cassandra.contact-points}";
     public static final String KEY_SPACE_ENV = "${spring.ai.vectorstore.cassandra.keyspace}";
-
-    /**
-     * 梁场
-     */
-    public static class BEAM {
-        public static final String BASE_URL_ENV = "${easttrans.beam-construction.base-url}";
-        public static final String USERNAME_ENV = "${easttrans.beam-construction.username}";
-        public static final String PASSWORD_ENV = "${easttrans.beam-construction.password}";
-        public static final String SUFFIX_ENV = "${easttrans.beam-construction.suffix}";
-    }
+    private static final String USER_SESSION_TABLE_NAME = "ai_chat_user";
 
     /**
      * OpenAI
