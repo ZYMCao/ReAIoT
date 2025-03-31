@@ -42,7 +42,7 @@ public class AgenticApplication {
         SpringApplication.run(AgenticApplication.class, updateArguments(args));
     }
 
-    @Bean
+    //    @Bean
     public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
         return new CqlSessionBuilder()
                 .addContactPoint(new InetSocketAddress(contactPoint, 9042))

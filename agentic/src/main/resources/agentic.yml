@@ -29,5 +29,9 @@ spring:
         table: ai_vector_store
         initialize-schema: true
   cassandra:
-    contact-points: "${EASTTRANS_CASSANDRA:172.16.0.106}" # 10.0.0.66, 10.0.0.68, 172.16.0.104
-    keyspace-name: "${CASSANDRA_KEY_SPACE:reaiot_5853}"
+    cluster-name: ReAIoT
+    #    keyspace-name: "${CASSANDRA_KEY_SPACE:reaiot_5853}"
+    contact-points: "${EASTTRANS_CASSANDRA:10.0.0.66:9042,10.0.0.68:9042}" # 10.0.0.66, 10.0.0.68, 172.16.0.104, 172.16.0.106
+    username: "${CASSANDRA_USERNAME:cassandra}"
+    password: "${CASSANDRA_PASSWORD:cassandra}"
+    local-datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"

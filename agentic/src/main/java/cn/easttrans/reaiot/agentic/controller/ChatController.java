@@ -46,10 +46,10 @@ public class ChatController {
         return chatService.dialog(userId, sessionId, question.system(), question.user());
     }
 
-    @GetMapping(value = "/getMemory/{userId}/{sessionId}")
-    public List<Message> getMemory(@PathVariable String userId, @PathVariable String sessionId) {
-        return chatService.getMemory(userId, sessionId, 200);
-    }
+//    @GetMapping(value = "/getMemory/{userId}/{sessionId}")
+//    public List<Message> getMemory(@PathVariable String userId, @PathVariable String sessionId) {
+//        return chatService.getMemory(userId, sessionId, 200);
+//    }
 
     @GetMapping(value = "/getSessions/{userId}")
     public Set<String> getSessions(@PathVariable String userId) {

@@ -33,8 +33,6 @@ import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_UR
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.NOMEN_PROMPT_ENV;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
-import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_KEYSPACE_NAME;
-import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_TABLE_NAME;
 
 @Service
 @Slf4j
@@ -42,27 +40,30 @@ public class DefaultChatService implements ChatService {
     private final String urlLLM;
     private final Resource nameCreatorPrompt;
     private final String keySpace;
-    private final ChatMemory chatMemory;
+    //    private final ChatMemory chatMemory;
     private final ChatClient chatClient;
-    private final CqlSession cqlSession;
+    //    private final CqlSession cqlSession;
     private final Cache<String, Set<String>> cache;
 
     @Autowired
     public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
                               @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
                               @Value(KEY_SPACE_ENV) String keySpace,
-                              ChatMemory chatMemory,
+//                              ChatMemory chatMemory,
                               ChatModel chatModel,
-                              CqlSession cqlSession,
+//                              CqlSession cqlSession,
                               @Qualifier("userSessionsCache") Cache<String, Set<String>> cache) {
         this.urlLLM = urlLLM;
         this.nameCreatorPrompt = nameCreatorPrompt;
         this.keySpace = keySpace;
-        this.chatMemory = chatMemory;
+//        this.chatMemory = chatMemory;
         this.chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory), new SimpleLoggerAdvisor())
+                .defaultAdvisors(
+//                        new MessageChatMemoryAdvisor(chatMemory),
+                        new SimpleLoggerAdvisor()
+                )
                 .build();
-        this.cqlSession = cqlSession;
+//        this.cqlSession = cqlSession;
         this.cache = cache;
     }
 
@@ -114,10 +115,10 @@ public class DefaultChatService implements ChatService {
                 });
     }
 
-    public List<Message> getMemory(String userId, String dialogId, int lastN) {
-        String sessionId = userId + ":" + dialogId;
-        return this.chatMemory.get(sessionId, lastN);
-    }
+//    public List<Message> getMemory(String userId, String dialogId, int lastN) {
+//        String sessionId = userId + ":" + dialogId;
+//        return this.chatMemory.get(sessionId, lastN);
+//    }
 
     public Set<String> getUserSessions(String userId) { // ToDo: do it reactively
         Set<String> cachedSessions = cache.getIfPresent(userId);
@@ -125,23 +126,23 @@ public class DefaultChatService implements ChatService {
             log.trace("Current cache state: {}", cache.asMap());
             return cachedSessions;
         } else {
-            PreparedStatement stmt = cqlSession.prepare("SELECT DISTINCT session_id FROM " + DEFAULT_KEYSPACE_NAME + "." + DEFAULT_TABLE_NAME);
+//            PreparedStatement stmt = cqlSession.prepare("SELECT DISTINCT session_id FROM " + DEFAULT_KEYSPACE_NAME + "." + DEFAULT_TABLE_NAME);
 
-            ResultSet rs = this.cqlSession.execute(stmt.bind());
+//            ResultSet rs = this.cqlSession.execute(stmt.bind());
 
             Map<String, Set<String>> sessionsByUser = new HashMap<>();
-            rs.forEach(row -> {
-                String sessionId = row.getString("session_id");
-                if (null != sessionId) {
-                    String[] parts = sessionId.split(":", 2);
-                    if (parts.length == 2) {
-                        sessionsByUser
-                                .computeIfAbsent(parts[0], k -> new HashSet<>())
-                                .add(parts[1]);
-                    }
-
-                }
-            });
+//            rs.forEach(row -> {
+//                String sessionId = row.getString("session_id");
+//                if (null != sessionId) {
+//                    String[] parts = sessionId.split(":", 2);
+//                    if (parts.length == 2) {
+//                        sessionsByUser
+//                                .computeIfAbsent(parts[0], k -> new HashSet<>())
+//                                .add(parts[1]);
+//                    }
+//
+//                }
+//            });
             sessionsByUser.forEach(cache::put);
             log.trace("Current cache state: {}", cache.asMap());
             return sessionsByUser.getOrDefault(userId, Collections.emptySet());
