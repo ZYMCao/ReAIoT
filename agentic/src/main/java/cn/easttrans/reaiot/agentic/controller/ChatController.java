@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Set;
 
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -55,7 +57,7 @@ public class ChatController {
     }
 
     @GetMapping(value = "/getSessions/{userId}", produces = APPLICATION_JSON_VALUE)
-    public Flux<String> getSessions(@PathVariable String userId) {
+    public Mono<Set<String>> getSessions(@PathVariable String userId) {
         return chatService.getUserSessions(userId);
     }
 }

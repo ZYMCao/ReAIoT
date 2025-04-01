@@ -109,26 +109,29 @@ public class DefaultChatService implements ChatService {
         return this.chatMemory.get(sessionId, lastN);
     }
 
-    public Flux<String> getUserSessions(String userId) {
-        return Mono.fromSupplier(() -> cache.getIfPresent(userId))
-                .switchIfEmpty(
-                        chatUserRepository.findByUserId(userId)
-                                .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!")))
-                                .doOnNext(fetched -> log.trace("Cache miss for user {}, querying repository", userId))
-                                .map(AIChatUser::sessionId)
-                                .collect(Collectors.toSet())
-                                .doOnNext(sessions -> {
-                                    cache.put(userId, sessions);
-                                    log.trace("Updated cache for user {} with {} sessions", userId, sessions.size());
-                                })
-                )
+    public Mono<Set<String>> getUserSessions(String userId) {
+        return Mono.just(userId)
+                .mapNotNull(cache::getIfPresent) // 从缓存中拿
+                .switchIfEmpty(getUserSessionsAbCassandra(userId)) // 从数据库中拿
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(Flux::fromIterable)
+//                .flatMapMany(Flux::fromIterable)
                 .doOnSubscribe(__ -> log.trace("Fetching sessions for user {}", userId))
-                .doOnComplete(() -> log.trace("Current cache state: {}", cache.asMap()))
+//                .doOnComplete(() -> log.trace("Current cache state: {}", cache.asMap()))
                 .onErrorResume(e -> {
                     log.error("Error fetching sessions for user {}", userId, e);
-                    return Flux.empty();
+                    return Mono.empty();
+                });
+    }
+
+    Mono<Set<String>> getUserSessionsAbCassandra(String userId) {
+        return chatUserRepository.findByUserId(userId)
+                .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDO: properly handle trivial return
+                .doOnNext(fetched -> log.trace("Cache miss for user {}, querying repository", userId))
+                .map(AIChatUser::sessionId)
+                .collect(Collectors.toSet())
+                .doOnNext(sessions -> {
+                    cache.put(userId, sessions);
+                    log.trace("Updated cache for user {} with {}", userId, sessions);
                 });
     }
 }
