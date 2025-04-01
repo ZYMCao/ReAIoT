@@ -84,6 +84,8 @@ public class DefaultChatService implements ChatService {
                         return updatedSessions;
                     });
                     log.debug("Updated cache for userId={} with sessionId={}", userId, conversationId);
+
+                    saveUserSession(userId, conversationId);
                 })
                 .onErrorResume(e -> {
                     log.error("Error while processing LLM stream", e);
@@ -94,28 +96,34 @@ public class DefaultChatService implements ChatService {
                 });
     }
 
+    void saveUserSession(String userId, String conversationId) {
+        chatUserRepository.save(new AIChatUser(userId, conversationId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe(
+                        saved -> log.debug("Saved session to Cassandra: userId={}, sessionId={}", userId, conversationId),
+                        error -> log.error("Failed to save session to Cassandra", error)
+                );
+    }
+
     public List<Message> getMemory(String sessionId, int lastN) {
         return this.chatMemory.get(sessionId, lastN);
     }
 
     public Flux<String> getUserSessions(String userId) {
         return Mono.fromSupplier(() -> cache.getIfPresent(userId))
+                .switchIfEmpty(
+                        chatUserRepository.findByUserId(userId)
+                                .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!")))
+                                .doOnNext(fetched -> log.trace("Cache miss for user {}, querying repository", userId))
+                                .map(AIChatUser::sessionId)
+                                .collect(Collectors.toSet())
+                                .doOnNext(sessions -> {
+                                    cache.put(userId, sessions);
+                                    log.trace("Updated cache for user {} with {} sessions", userId, sessions.size());
+                                })
+                )
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMapMany(cachedSessions -> {
-                    if (cachedSessions != null) {
-                        log.trace("Cache hit for user {}", userId);
-                        return Flux.fromIterable(cachedSessions);
-                    }
-                    log.trace("Cache miss for user {}, querying repository", userId);
-                    return chatUserRepository.findByUserId(userId)
-                            .map(AIChatUser::sessionId)
-                            .collect(Collectors.toSet())
-                            .doOnNext(sessions -> {
-                                cache.put(userId, sessions);
-                                log.trace("Updated cache for user {} with {} sessions", userId, sessions.size());
-                            })
-                            .flatMapMany(Flux::fromIterable);
-                })
+                .flatMapMany(Flux::fromIterable)
                 .doOnSubscribe(__ -> log.trace("Fetching sessions for user {}", userId))
                 .doOnComplete(() -> log.trace("Current cache state: {}", cache.asMap()))
                 .onErrorResume(e -> {
