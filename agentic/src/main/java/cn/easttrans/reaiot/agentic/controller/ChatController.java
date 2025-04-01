@@ -1,6 +1,6 @@
 package cn.easttrans.reaiot.agentic.controller;
 
-import cn.easttrans.reaiot.agentic.domain.chat.Question;
+import cn.easttrans.reaiot.agentic.domain.dto.chat.Question;
 import cn.easttrans.reaiot.agentic.service.chat.DefaultChatService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.Message;

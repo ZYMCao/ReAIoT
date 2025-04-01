@@ -1,4 +1,4 @@
-package cn.easttrans.reaiot.agentic.domain.chat;
+package cn.easttrans.reaiot.agentic.domain.dto.chat;
 
 import java.io.Serializable;
 

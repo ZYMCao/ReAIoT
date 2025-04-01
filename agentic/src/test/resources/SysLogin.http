@@ -1,10 +1,10 @@
 ### login
-POST {{baseUrl}}/login
+POST {{beamUrl}}/login
 Content-Type: application/json;charset=UTF-8
 
 {
-  "username": "{{username}}",
-  "password": "{{password}}",
+  "username": "{{beamUsername}}",
+  "password": "{{beamPassword}}",
   "suffix": "login_njlc",
   "token": false
 }

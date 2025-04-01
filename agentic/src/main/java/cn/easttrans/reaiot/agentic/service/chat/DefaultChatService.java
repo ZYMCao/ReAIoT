@@ -1,8 +1,10 @@
 package cn.easttrans.reaiot.agentic.service.chat;
 
 import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.MtlStoragePageRequest;
+import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.SwSnLqRequest;
 import cn.easttrans.reaiot.agentic.domain.exception.TrivialResponseError;
 import cn.easttrans.reaiot.agentic.service.beamconstruction.AbstractBeamConstructionService;
+import cn.easttrans.reaiot.agentic.service.beamconstruction.AccountMapService;
 import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +54,7 @@ public class DefaultChatService implements ChatService {
     private final CqlSession cqlSession;
     private final Cache<String, Set<String>> cache;
     private final BeamMtlService beamMtlService;
+    private final AccountMapService accountMapService;
     private static final String ningyanPromptEnhanced =
             "You engage in conversation with your interlocutor on \"宁盐梁场\",\n" +
                     "a program, whose front end in vue and back end in springboot, on smart construction of beams for highways between 南京 and 盐城.\n" +
@@ -69,12 +73,14 @@ public class DefaultChatService implements ChatService {
                               ChatMemory chatMemory,
                               ChatModel chatModel,
                               CqlSession cqlSession,
-                              @Qualifier("userSessionsCache") Cache<String, Set<String>> cache) {
+                              @Qualifier("userSessionsCache") Cache<String, Set<String>> cache,
+                              AccountMapService accountMapService) {
         this.urlLLM = urlLLM;
         this.nameCreatorPrompt = nameCreatorPrompt;
         this.keySpace = keySpace;
         this.chatMemory = chatMemory;
         this.beamMtlService = beamMtlService;
+        this.accountMapService = accountMapService;
         this.chatClient = ChatClient.builder(chatModel)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory), new SimpleLoggerAdvisor())
 //                .defaultTools(beamMtlService)
@@ -115,7 +121,7 @@ public class DefaultChatService implements ChatService {
         }
         if (!userMsg.isEmpty()) {
             var refineUserMsg = userMsg.contains("宁盐梁场") ? "一些宁盐梁场的背景信息(如果对话历史中你已经给出过背景信息了，那就不要再给出了): " + ningyanPromptEnhanced : userMsg;
-            refineUserMsg = userMsg.contains("物料入库") ? "根据API返回的数据，回答问题。API返回: \n" + Arrays.toString(beamMtlService.materialStorage(150)) + "\n 问题: \n" + refineUserMsg : refineUserMsg;
+            refineUserMsg = userMsg.contains("物料") ? "根据API返回的数据，回答问题。API返回: \n" + Arrays.toString(beamMtlService.materialStorage(150)) + "\n 问题: \n" + refineUserMsg : refineUserMsg;
             chatClientRequestSpec.user(refineUserMsg);
             log.info("Dialog {} asked: {}", conversationId, refineUserMsg);
         }
@@ -135,7 +141,7 @@ public class DefaultChatService implements ChatService {
                     String refinedUserMsg = "宁盐梁场背景信息..." + ningyanPromptEnhanced;
                     log.info("Dialog {} asked: {}", conversationId, refinedUserMsg);
                     return Mono.just(chatClient.prompt().system(tempSystemMsg).user(refinedUserMsg));
-                } else if (userMsg.contains("物料入库")) {
+                } else if (userMsg.contains("物料")) {
                     return beamMtlService.materialStorage(new MtlStoragePageRequest(150))
                             .map(materials -> {
                                 String refinedTempSystemMsg = tempSystemMsg + "根据API返回的数据(不用提及出处)，回答问题。\nAPI的返回: \n" + Arrays.toString(materials);

@@ -29,6 +29,7 @@ public abstract class AbstractBeamConstructionService {
     protected static final String LOGIN = "/login";
     protected static final String BEAM_MATERIAL_STORAGE = "/beamMtl/mtlStoragePage";
     protected static final String CODE_TREE = "/beamCode/codeTree";
+    protected static final String ASPHALT_CEMENT = "/zhgdAccountMap/zhgdSwSnLq";
 
 
     private Mono<JsonNode> checkForErrors(JsonNode json) {
