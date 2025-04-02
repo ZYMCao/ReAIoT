@@ -3,34 +3,34 @@ POST http://localhost:7845/ai/chat/dialog/814531/40213110164-12436-47140-901315-
 Content-Type: application/json
 
 {
-  "user": "你好，我是展颖",
-  "system": ""
+  "user": "你好，我是展颖"
 }
 
-### localhost dialog 你了解宁盐梁场吗？
+### localhost dialog SpringBoot应用如何SSE开发
+POST http://localhost:7845/ai/chat/dialog/814531/40213110164-12436-47140-901315-10139106142125628
+Content-Type: application/json
+
+{
+  "user": "SpringBoot应用如何SSE开发"
+}
+
+### localhost dialog 你了解北海铁山港吗？
 POST http://localhost:7845/ai/chat/dialog/814531/12013110174-12436-47141-901315-10139106142125627
 Content-Type: application/json
 
 {
-  "user": "你了解宁盐梁场吗？"
-}
-
-### localhost dialog 提供一些物料入库的信息
-POST http://localhost:7845/ai/chat/dialog/814531/12013110174-12436-47141-901315-10139106142125627
-Content-Type: application/json
-
-{
-  "user": "提供一些物料入库的信息"
+  "user": "你了解北海铁山港吗？"
 }
 
 ### localhost getMemory 获取对话的具体交互内容
 GET http://localhost:7845/ai/chat/getMemory/814531/40213110164-12436-47140-901315-10139106142125628
 
-
 ### getSessions by userId 获取用户的对话
 GET http://localhost:7845/ai/chat/getSessions/814531
 
 
+### clearMemory 删除用户的对话
+DELETE http://localhost:7845/ai/chat/clearMemory/814531/12013110174-12436-47141-901315-10139106142125627
 
 ## 172.16.0.106:7845
 

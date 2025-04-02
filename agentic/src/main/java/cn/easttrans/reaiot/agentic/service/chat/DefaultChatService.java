@@ -54,6 +54,7 @@ public class DefaultChatService implements ChatService {
         this.chatUserRepository = chatUserRepository;
     }
 
+    @Override
     public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, String systemMsg, String userMsg) {
         ChatClient.ChatClientRequestSpec chatClientRequestSpec = chatClient.prompt();
         chatClientRequestSpec.user(userMsg);
@@ -61,12 +62,12 @@ public class DefaultChatService implements ChatService {
             chatClientRequestSpec.system(systemMsg);
         }
 
-        return getServerSentEventFlux(userId, dialogId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
+        return getSSEFlux(userId, dialogId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
     }
 
-    private Flux<ServerSentEvent<String>> getServerSentEventFlux(String userId, String conversationId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
+    private Flux<ServerSentEvent<String>> getSSEFlux(String userId, String sessionId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
         return chatClientRequestSpec
-                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 2))
+                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, sessionId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 2))
                 .stream()
                 .content()
                 .switchIfEmpty(Mono.defer(() -> {
@@ -80,12 +81,12 @@ public class DefaultChatService implements ChatService {
                     cache.asMap().compute(userId, (key, existingSessions) -> {
                         Set<String> updatedSessions = existingSessions != null ?
                                 new HashSet<>(existingSessions) : new HashSet<>();
-                        updatedSessions.add(conversationId);
+                        updatedSessions.add(sessionId);
                         return updatedSessions;
                     });
-                    log.debug("Updated cache for userId={} with sessionId={}", userId, conversationId);
+                    log.debug("Updated cache for userId={} with sessionId={}", userId, sessionId);
 
-                    saveUserSession(userId, conversationId);
+                    saveUserSession(userId, sessionId);
                 })
                 .onErrorResume(e -> {
                     log.error("Error while processing LLM stream", e);
@@ -96,37 +97,52 @@ public class DefaultChatService implements ChatService {
                 });
     }
 
-    void saveUserSession(String userId, String conversationId) {
-        chatUserRepository.save(new AIChatUser(userId, conversationId))
+    void saveUserSession(String userId, String sessionId) {
+        chatUserRepository.save(new AIChatUser(userId, sessionId))
                 .subscribeOn(Schedulers.boundedElastic())
                 .subscribe(
-                        saved -> log.debug("Saved session to Cassandra: userId={}, sessionId={}", userId, conversationId),
-                        error -> log.error("Failed to save session to Cassandra", error)
+                        saved -> log.debug("Saved session to Cassandra: userId={}, sessionId={}", userId, sessionId),
+                        error -> log.error("Failed to save session={} of userId={} to Cassandra", sessionId, userId, error)
                 );
     }
 
-    public List<Message> getMemory(String sessionId, int lastN) {
-        return this.chatMemory.get(sessionId, lastN);
+    @Override
+    public Mono<Message[]> getMemory(String sessionId, int lastN) {
+        return Mono.fromCallable(() -> chatMemory.get(sessionId, lastN))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(list -> list.toArray(Message[]::new));
     }
 
-    public Mono<Set<String>> getUserSessions(String userId) {
+    @Override
+    public Mono<Void> clearMemory(String userId, String sessionId) {
+        return Mono.fromRunnable(() -> this.chatMemory.clear(sessionId))
+                .doOnSubscribe(s -> log.debug("clearing memory for sessionId={}", sessionId))
+                .then(chatUserRepository.deleteById(new AIChatUser(userId, sessionId)))
+                .doOnSuccess(unused ->
+                        cache.asMap().forEach((user, sessions) -> {
+                            if (sessions != null && sessions.remove(sessionId)) {
+                                log.debug("Removed sessionId={} from cache for userId={}", sessionId, user);
+                            }
+                        })
+                );
+    }
+
+    @Override
+    public Mono<Set<String>> getSessions(String userId) {
         return Mono.just(userId)
                 .mapNotNull(cache::getIfPresent) // 从缓存中拿
-                .switchIfEmpty(getUserSessionsAbCassandra(userId)) // 从数据库中拿
+                .switchIfEmpty(getSessionsAbCassandra(userId)) // 从数据库中拿
                 .subscribeOn(Schedulers.boundedElastic())
-//                .flatMapMany(Flux::fromIterable)
                 .doOnSubscribe(__ -> log.trace("Fetching sessions for user {}", userId))
-//                .doOnComplete(() -> log.trace("Current cache state: {}", cache.asMap()))
                 .onErrorResume(e -> {
                     log.error("Error fetching sessions for user {}", userId, e);
                     return Mono.empty();
                 });
     }
 
-    Mono<Set<String>> getUserSessionsAbCassandra(String userId) {
+    Mono<Set<String>> getSessionsAbCassandra(String userId) {
         return chatUserRepository.findByUserId(userId)
-                .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDO: properly handle trivial return
-                .doOnNext(fetched -> log.trace("Cache miss for user {}, querying repository", userId))
+                // .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDO: properly handle trivial return
                 .map(AIChatUser::sessionId)
                 .collect(Collectors.toSet())
                 .doOnNext(sessions -> {
