@@ -42,6 +42,7 @@
         <module>agentic</module>
         <!--        <module>mqtt</module>-->
         <!--        <module>ui-ngx</module>-->
+        <module>kafka-bridge</module>
     </modules>
 
     <dependencyManagement>
