@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.easttrans</groupId>
         <artifactId>reaiot</artifactId>
-        <version>0.2.Cassandra</version>
+        <version>0.3.NingYanBeamConstruction</version>
     </parent>
 
     <groupId>cn.easttrans.reaiot</groupId>

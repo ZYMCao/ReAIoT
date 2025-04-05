@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: ReAIoT Kafka Bridge
+    title: Bridging data from TCP Server to Kafka
+    main:
+      web-application-type: NONE
+  kafka:
+    producer:
+      bootstrap-servers: "${KAFKA_SERVERS:10.0.0.70:9092}"
+      # key-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      # value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+
+beidou:
+  tcp:
+    host: "${BEIDOU_TCP_HOST:47.110.85.243}"
+    port: "${BEIDOU_TCP_PORT:11966}"
+  kafka:
+    topic: "${BEIDOU_KAFKA_TOPIC:BeiHai_TieShan_Port_Channel_Project_RawData}"

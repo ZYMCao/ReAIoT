@@ -52,26 +52,6 @@ public class AgenticApplication {
     }
 
     @Bean
-    public CqlSession cqlSession(@Value(CASSANDRA_CONTACT_ENV) String contactPoint) {
-        return new CqlSessionBuilder()
-                .addContactPoint(new InetSocketAddress(contactPoint, 9042))
-                .withLocalDatacenter("datacenter1")
-                .build();
-    }
-
-    @Bean
-    public EmbeddingModel defaultEmbeddingModel() throws Exception {
-        var embeddingModel = new TransformersEmbeddingModel();
-        embeddingModel.setTokenizerResource("classpath:/onnx/all-MiniLM-L6-v2/tokenizer.json");
-        embeddingModel.setModelResource("classpath:/onnx/all-MiniLM-L6-v2/model.onnx"); // ToDo: Outsource model.onnx
-        embeddingModel.setResourceCacheDirectory("/tmp/onnx-zoo");
-        embeddingModel.setTokenizerOptions(Map.of("padding", "true"));
-
-        embeddingModel.afterPropertiesSet();
-        return embeddingModel;
-    }
-
-    @Bean
     LoginRequest defaultLoginRequest(@Value(USERNAME_ENV) String username,
                                      @Value(PASSWORD_ENV) String password,
                                      @Value(SUFFIX_ENV) String suffix) {

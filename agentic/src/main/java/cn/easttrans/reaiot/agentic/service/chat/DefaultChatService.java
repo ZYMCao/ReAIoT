@@ -1,14 +1,8 @@
 package cn.easttrans.reaiot.agentic.service.chat;
 
-import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.MtlStoragePageRequest;
-import cn.easttrans.reaiot.agentic.domain.dto.beamconstruction.SwSnLqRequest;
+import cn.easttrans.reaiot.agentic.dao.nosql.ChatUserRepository;
 import cn.easttrans.reaiot.agentic.domain.exception.TrivialResponseError;
-import cn.easttrans.reaiot.agentic.service.beamconstruction.AbstractBeamConstructionService;
-import cn.easttrans.reaiot.agentic.service.beamconstruction.AccountMapService;
-import cn.easttrans.reaiot.agentic.service.beamconstruction.BeamMtlService;
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import cn.easttrans.reaiot.agentic.domain.persistence.nosql.AIChatUser;
 import com.github.benmanes.caffeine.cache.Cache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -25,149 +19,70 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.KEY_SPACE_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.BASE_URL_ENV;
 import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.NOMEN_PROMPT_ENV;
+import static cn.easttrans.reaiot.agentic.EnvironmentalConstants.OPEN_AI.SYS_PROMPT_ENV;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_RETRIEVE_SIZE_KEY;
-import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_KEYSPACE_NAME;
-import static org.springframework.ai.chat.memory.cassandra.CassandraChatMemoryConfig.DEFAULT_TABLE_NAME;
 
 @Service
 @Slf4j
 public class DefaultChatService implements ChatService {
-    private final String urlLLM;
+    private final Resource systemPrompt;
     private final Resource nameCreatorPrompt;
-    private final String keySpace;
+    private final String urlLLM;
     private final ChatMemory chatMemory;
     private final ChatClient chatClient;
-    private final CqlSession cqlSession;
     private final Cache<String, Set<String>> cache;
-    private final BeamMtlService beamMtlService;
-    private final AccountMapService accountMapService;
-    private static final String ningyanPromptEnhanced =
-            "You engage in conversation with your interlocutor on \"宁盐梁场\",\n" +
-                    "a program, whose front end in vue and back end in springboot, on smart construction of beams for highways between 南京 and 盐城.\n" +
-                    "\"宁盐梁场\" is about order placement, concrete pouring, curing, tensioning, storage, grouting, inspection, transportation, and erection of beams.\n" +
-                    "Your reply shall always be in Mandarin Chinese." +
-                    "Below is more info of \"宁盐梁场\":\n" +
-                    "南京至盐城高速扬州段NY-YZ5标位于扬州市仪征、高邮境内，起点桩号为K35+000，终点桩号为K71+800，线路长39.729km。\n" +
-                    "本标段主线桥梁共计32座，总长15745.44m，特大桥10054.48m/2座、大桥4263.04m/8座、中小桥1427.92m/22座。\n" +
-                    "建设箱梁预制场一座，占地330亩，负责本标段及YZ6-11标箱梁预制并运输至相应标段临时存梁场。";
+    private final ChatUserRepository chatUserRepository;
 
     @Autowired
-    public DefaultChatService(@Value(BASE_URL_ENV) String urlLLM,
+    public DefaultChatService(@Value(SYS_PROMPT_ENV) Resource systemPrompt,
                               @Value(NOMEN_PROMPT_ENV) Resource nameCreatorPrompt,
-                              @Value(KEY_SPACE_ENV) String keySpace,
-                              BeamMtlService beamMtlService,
+                              @Value(BASE_URL_ENV) String urlLLM,
                               ChatMemory chatMemory,
                               ChatModel chatModel,
-                              CqlSession cqlSession,
                               @Qualifier("userSessionsCache") Cache<String, Set<String>> cache,
-                              AccountMapService accountMapService) {
-        this.urlLLM = urlLLM;
+                              ChatUserRepository chatUserRepository) {
+        this.systemPrompt = systemPrompt;
         this.nameCreatorPrompt = nameCreatorPrompt;
-        this.keySpace = keySpace;
+        this.urlLLM = urlLLM;
         this.chatMemory = chatMemory;
-        this.beamMtlService = beamMtlService;
-        this.accountMapService = accountMapService;
-        this.chatClient = ChatClient.builder(chatModel)
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory), new SimpleLoggerAdvisor())
-//                .defaultTools(beamMtlService)
-                .build();
-        this.cqlSession = cqlSession;
+        this.chatClient = ChatClient.builder(chatModel).defaultAdvisors(
+                new MessageChatMemoryAdvisor(chatMemory),
+                new SimpleLoggerAdvisor()
+        ).build();
         this.cache = cache;
-
-//        this.initializeTable();
+        this.chatUserRepository = chatUserRepository;
     }
 
-    private static final String USER_SESSION_TABLE_NAME = "ai_chat_user";
+    @Override
+    public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, String userMsg) {
+        ChatClient.ChatClientRequestSpec chatClientRequestSpec = chatClient.prompt().user(userMsg).system(systemPrompt);
 
-    private void initializeTable() {
-        try {
-            boolean tableExists = cqlSession.execute(
-                    String.format("SELECT table_name FROM system_schema.tables WHERE keyspace_name = '%s' AND table_name = '" + USER_SESSION_TABLE_NAME + "';", keySpace)
-            ).one() != null;
-            if (!tableExists) {
-                log.warn("Table {} was not found, creating it ...", USER_SESSION_TABLE_NAME);
-                cqlSession.execute(String.format(
-                        "CREATE TABLE %s.ai_chat_user (" +
-                                "   user_id text," +
-                                "   session_id text," +
-                                "   PRIMARY KEY (user_id, session_id)" +
-                                ") WITH CLUSTERING ORDER BY (session_id DESC);",
-                        keySpace));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize ai_chat_user table", e);
-        }
+        return getSSEFlux(userId, dialogId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
     }
 
+    @Override
     public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, String systemMsg, String userMsg) {
-        String conversationId = userId + ":" + dialogId;
         ChatClient.ChatClientRequestSpec chatClientRequestSpec = chatClient.prompt();
-        if (!systemMsg.isEmpty()) {
+        chatClientRequestSpec.user(userMsg);
+        if (null != systemMsg && !systemMsg.isEmpty() && !systemMsg.isBlank()) {
             chatClientRequestSpec.system(systemMsg);
         }
-        if (!userMsg.isEmpty()) {
-            var refineUserMsg = userMsg.contains("宁盐梁场") ? "一些宁盐梁场的背景信息(如果对话历史中你已经给出过背景信息了，那就不要再给出了): " + ningyanPromptEnhanced : userMsg;
-            refineUserMsg = userMsg.contains("物料") ? "根据API返回的数据，回答问题。API返回: \n" + Arrays.toString(beamMtlService.materialStorage(150)) + "\n 问题: \n" + refineUserMsg : refineUserMsg;
-            chatClientRequestSpec.user(refineUserMsg);
-            log.info("Dialog {} asked: {}", conversationId, refineUserMsg);
-        }
 
-        return getServerSentEventFlux(conversationId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
+        return getSSEFlux(userId, dialogId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpec);
     }
 
-    public Flux<ServerSentEvent<String>> dialog(String userId, String dialogId, Resource systemMsg, String userMsg) {
-        String conversationId = userId + ":" + dialogId;
-
-        String tempSystemMsg = "You engage in conversation with your interlocutor on \"宁盐梁场\". Your reply shall always be in Mandarin Chinese.";
-        Mono<ChatClient.ChatClientRequestSpec> chatClientRequestSpecMono = Mono.defer(() -> {
-            if (userMsg.isEmpty()) {
-                return Mono.just(chatClient.prompt().system(tempSystemMsg));
-            } else {
-                if (userMsg.contains("宁盐梁场")) {
-                    String refinedUserMsg = "宁盐梁场背景信息..." + ningyanPromptEnhanced;
-                    log.info("Dialog {} asked: {}", conversationId, refinedUserMsg);
-                    return Mono.just(chatClient.prompt().system(tempSystemMsg).user(refinedUserMsg));
-                } else if (userMsg.contains("物料")) {
-                    return beamMtlService.materialStorage(new MtlStoragePageRequest(150))
-                            .map(materials -> {
-                                String refinedTempSystemMsg = tempSystemMsg + "根据API返回的数据(不用提及出处)，回答问题。\nAPI的返回: \n" + Arrays.toString(materials);
-                                log.info("Dialog {} asked: {}", conversationId, userMsg);
-                                return chatClient.prompt().system(refinedTempSystemMsg).user(userMsg);
-                            });
-                } else {
-                    return Mono.just(chatClient.prompt().system(tempSystemMsg).user(userMsg));
-                }
-            }
-        });
-
-        return getServerSentEventFlux(conversationId, "Fail to connect to " + urlLLM + "!!", chatClientRequestSpecMono);
-    }
-
-
-    private Flux<ServerSentEvent<String>> getServerSentEventFlux(String conversationId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
-        String[] parts = conversationId.split(":", 2);
-        if (parts.length != 2) {
-            return Flux.error(new IllegalArgumentException("Invalid conversationId format: " + conversationId));
-        }
-        String userId = parts[0];
-        String sessionId = parts[1];
-
+    private Flux<ServerSentEvent<String>> getSSEFlux(String userId, String sessionId, String llmCallError, ChatClient.ChatClientRequestSpec chatClientRequestSpec) {
         return chatClientRequestSpec
-                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 2))
+                .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, sessionId).param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 2))
                 .stream()
                 .content()
                 .switchIfEmpty(Mono.defer(() -> {
@@ -185,6 +100,8 @@ public class DefaultChatService implements ChatService {
                         return updatedSessions;
                     });
                     log.debug("Updated cache for userId={} with sessionId={}", userId, sessionId);
+
+                    saveUserSession(userId, sessionId);
                 })
                 .onErrorResume(e -> {
                     log.error("Error while processing LLM stream", e);
@@ -195,54 +112,34 @@ public class DefaultChatService implements ChatService {
                 });
     }
 
-    private Flux<ServerSentEvent<String>> getServerSentEventFlux(String conversationId, String llmCallError, Mono<ChatClient.ChatClientRequestSpec> chatClientRequestSpecMono) {
-        String[] parts = conversationId.split(":", 2);
-        if (parts.length != 2) {
-            return Flux.error(new IllegalArgumentException("Invalid conversationId format: " + conversationId));
-        }
-        String userId = parts[0];
-        String sessionId = parts[1];
-
-        return chatClientRequestSpecMono.flatMapMany(chatClientRequestSpec ->
-                chatClientRequestSpec
-                        .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId)
-                                .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100))
-                        .stream()
-                        .content()
-                        .switchIfEmpty(Mono.defer(() -> {
-                            log.warn("Empty response from LLM - {}", llmCallError);
-                            return Mono.error(new TrivialResponseError(llmCallError));
-                        }))
-                        .doOnNext(log::debug)
-                        .map(content -> ServerSentEvent.builder(content).event("message").build())
-                        .concatWithValues(ServerSentEvent.builder("[DONE]").build())
-                        .doOnComplete(() -> {
-                            cache.asMap().compute(userId, (key, existingSessions) -> {
-                                Set<String> updatedSessions = existingSessions != null ?
-                                        new HashSet<>(existingSessions) : new HashSet<>();
-                                updatedSessions.add(sessionId);
-                                return updatedSessions;
-                            });
-                            log.debug("Updated cache for userId={} with sessionId={}", userId, sessionId);
-                        })
-                        .onErrorResume(e -> {
-                            log.error("Error while processing LLM stream", e);
-                            return Flux.just(
-                                    ServerSentEvent.builder("Error: " + e.getMessage()).event("error").build(),
-                                    ServerSentEvent.builder("[DONE]").build()
-                            );
-                        })
-        );
+    void saveUserSession(String userId, String sessionId) {
+        chatUserRepository.save(new AIChatUser(userId, sessionId))
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe(
+                        saved -> log.debug("Saved session to Cassandra: userId={}, sessionId={}", userId, sessionId),
+                        error -> log.error("Failed to save session={} of userId={} to Cassandra", sessionId, userId, error)
+                );
     }
 
-
-    public void clearMemory(String sessionId) {
-        this.chatMemory.clear(sessionId);
+    @Override
+    public Mono<Message[]> getMemory(String sessionId, int lastN) {
+        return Mono.fromCallable(() -> chatMemory.get(sessionId, lastN))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(list -> list.toArray(Message[]::new));
     }
 
-    public List<Message> getMemory(String userId, String dialogId, int lastN) {
-        String sessionId = userId + ":" + dialogId;
-        return this.chatMemory.get(sessionId, lastN);
+    @Override
+    public Mono<Void> clearMemory(String userId, String sessionId) {
+        return Mono.fromRunnable(() -> this.chatMemory.clear(sessionId))
+                .doOnSubscribe(s -> log.debug("clearing memory for sessionId={}", sessionId))
+                .then(chatUserRepository.deleteById(new AIChatUser(userId, sessionId)))
+                .doOnSuccess(unused ->
+                        cache.asMap().forEach((user, sessions) -> {
+                            if (sessions != null && sessions.remove(sessionId)) {
+                                log.debug("Removed sessionId={} from cache for userId={}", sessionId, user);
+                            }
+                        })
+                );
     }
 
     public String getConversationName(String userMsg) {
@@ -257,32 +154,27 @@ public class DefaultChatService implements ChatService {
         }
     }
 
-    public Set<String> getUserSessions(String userId) { // ToDo: do it reactively
-        Set<String> cachedSessions = cache.getIfPresent(userId);
-        if (cachedSessions != null) {
-            log.trace("Current cache state: {}", cache.asMap());
-            return cachedSessions;
-        } else {
-            PreparedStatement stmt = cqlSession.prepare("SELECT DISTINCT session_id FROM " + DEFAULT_KEYSPACE_NAME + "." + DEFAULT_TABLE_NAME);
+    @Override
+    public Mono<Set<String>> getSessions(String userId) {
+        return Mono.just(userId)
+                .mapNotNull(cache::getIfPresent) // 从缓存中拿
+                .switchIfEmpty(getSessionsAbCassandra(userId)) // 从数据库中拿
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSubscribe(__ -> log.trace("Fetching sessions for user {}", userId))
+                .onErrorResume(e -> {
+                    log.error("Error fetching sessions for user {}", userId, e);
+                    return Mono.empty();
+                });
+    }
 
-            ResultSet rs = this.cqlSession.execute(stmt.bind());
-
-            Map<String, Set<String>> sessionsByUser = new HashMap<>();
-            rs.forEach(row -> {
-                String sessionId = row.getString("session_id");
-                if (null != sessionId) {
-                    String[] parts = sessionId.split(":", 2);
-                    if (parts.length == 2) {
-                        sessionsByUser
-                                .computeIfAbsent(parts[0], k -> new HashSet<>())
-                                .add(parts[1]);
-                    }
-
-                }
-            });
-            sessionsByUser.forEach(cache::put);
-            log.trace("Current cache state: {}", cache.asMap());
-            return sessionsByUser.getOrDefault(userId, Collections.emptySet());
-        }
+    Mono<Set<String>> getSessionsAbCassandra(String userId) {
+        return chatUserRepository.findByUserId(userId)
+                // .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDo: properly handle trivial return
+                .map(AIChatUser::sessionId)
+                .collect(Collectors.toSet())
+                .doOnNext(sessions -> {
+                    cache.put(userId, sessions);
+                    log.trace("Updated cache for user {} with {}", userId, sessions);
+                });
     }
 }

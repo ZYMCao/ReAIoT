@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.easttrans</groupId>
     <artifactId>reaiot</artifactId>
-    <version>0.2.Cassandra</version>
+    <version>0.3.NingYanBeamConstruction</version>
     <packaging>pom</packaging>
     <name>ReAIoT</name>
     <description>响应式人工智能物联网系统</description>
@@ -42,6 +42,7 @@
         <module>agentic</module>
         <!--        <module>mqtt</module>-->
         <!--        <module>ui-ngx</module>-->
+        <!--        <module>kafka-bridge</module>-->
     </modules>
 
     <dependencyManagement>

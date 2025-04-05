@@ -7,9 +7,9 @@
     </appender>
 
     <appender name="fileLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/reaiot/ningyan/reaiot.log</file>
+        <file>/var/log/kafkabridge/kafkabridge.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/reaiot/ningyan/reaiot.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>/var/log/kafkabridge/kafkabridge.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -24,6 +24,5 @@
         <appender-ref ref="fileLogAppender"/>
     </root>
 
-    <logger name="cn.easttrans.reaiot" level="DEBUG"/>
-    <logger name="org.springframework.ai.chat.client.advisor" level="DEBUG"/>
+    <logger name="cn.easttrans.reaiot" level="INFO"/>
 </configuration>

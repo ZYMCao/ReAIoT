@@ -38,4 +38,5 @@ build/
 
 /agentic/src/main/resources/onnx/all-MiniLM-L6-v2/model.onnx
 DeploymentsOnUbuntu.md
+DeploymentsLLM.md
 reaiot.log

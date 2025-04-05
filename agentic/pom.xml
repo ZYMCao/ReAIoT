@@ -7,7 +7,7 @@
     <parent>
         <groupId>cn.easttrans</groupId>
         <artifactId>reaiot</artifactId>
-        <version>0.2.Cassandra</version>
+        <version>0.3.NingYanBeamConstruction</version>
     </parent>
 
     <groupId>cn.easttrans.reaiot</groupId>
@@ -35,9 +35,8 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+            <artifactId>spring-boot-starter-data-cassandra-reactive</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
@@ -46,10 +45,6 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-cassandra-store-spring-boot-starter</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.ai</groupId>-->
-        <!--            <artifactId>spring-ai-cassandra-store</artifactId>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-transformers-spring-boot-starter</artifactId>
