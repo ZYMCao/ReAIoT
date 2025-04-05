@@ -36,7 +36,7 @@ spring:
   cassandra:
     cluster-name: ReAIoT
     keyspace-name: "${CASSANDRA_KEY_SPACE:reaiot_5853}"
-    contact-points: "${EASTTRANS_CASSANDRA:172.16.0.104:9042}" # 10.0.0.66, 10.0.0.68, 172.16.0.104, 172.16.0.106
+    contact-points: "${EASTTRANS_CASSANDRA:172.16.0.106:9042}" # 10.0.0.66, 10.0.0.68, 172.16.0.104, 172.16.0.106
     username: "${CASSANDRA_USERNAME:cassandra}"
     password: "${CASSANDRA_PASSWORD:cassandra}"
     local-datacenter: datacenter1

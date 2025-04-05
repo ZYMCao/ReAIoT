@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -142,7 +141,7 @@ public class DefaultChatService implements ChatService {
 
     Mono<Set<String>> getSessionsAbCassandra(String userId) {
         return chatUserRepository.findByUserId(userId)
-                // .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDO: properly handle trivial return
+                // .switchIfEmpty(Mono.error(new TrivialResponseError("No session datum was fetched from Cassandra!!"))) // ToDo: properly handle trivial return
                 .map(AIChatUser::sessionId)
                 .collect(Collectors.toSet())
                 .doOnNext(sessions -> {
